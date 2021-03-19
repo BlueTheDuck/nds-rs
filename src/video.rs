@@ -136,7 +136,7 @@ pub mod colors {
 
 /// ABGR1555 color
 #[repr(transparent)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Color(pub u16);
 impl Color {
     pub fn get(&self) -> u16 {
