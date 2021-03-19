@@ -8,3 +8,7 @@ edition = "2018"
 
 [dependencies]
 nds-sys = { path = "nds-sys" }
+nds-entry = { path = "nds-entry" }
+
+[workspace]
+members = [ "nds-sys", "nds-entry" ]
