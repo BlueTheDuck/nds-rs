@@ -9,7 +9,6 @@ extern crate alloc;
 use alloc::string::String;
 use core::alloc::{GlobalAlloc, Layout};
 use core::fmt::Write;
-use debug::no_cash_message;
 
 macro_rules! bit {
     ($shift: literal) => {
@@ -37,7 +36,6 @@ pub mod debug {
     }
 }
 
-use core::ffi::c_void;
 type CPtr = *mut core::ffi::c_void;
 extern "C" {
     fn malloc(size: usize) -> CPtr;
@@ -59,7 +57,7 @@ unsafe impl GlobalAlloc for MallocAlloc {
         ptr as *mut u8
     }
 
-    unsafe fn dealloc(&self, ptr: *mut u8, layout: core::alloc::Layout) {
+    unsafe fn dealloc(&self, ptr: *mut u8, _: core::alloc::Layout) {
         free(ptr as CPtr);
     }
 

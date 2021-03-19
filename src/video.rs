@@ -169,3 +169,14 @@ impl From<Color> for u16 {
         color.0
     }
 }
+
+pub fn set_backdrop_color(color: Color) {
+    unsafe {
+        nds_sys::video::BG_PALETTE.write_volatile(color.0);
+    }
+}
+pub fn set_backdrop_color_sub(color: Color) {
+    unsafe {
+        nds_sys::video::BG_PALETTE_SUB.write_volatile(color.0);
+    }
+}
