@@ -2,8 +2,13 @@
 #![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
 
-use core::alloc::{GlobalAlloc, Layout};
+pub use nds_entry::entry;
 
+extern crate alloc;
+
+use alloc::string::String;
+use core::alloc::{GlobalAlloc, Layout};
+use core::fmt::Write;
 use debug::no_cash_message;
 
 macro_rules! bit {
@@ -11,7 +16,6 @@ macro_rules! bit {
         (1 << $shift)
     };
 }
-
 
 pub mod input;
 pub mod interrupts;
@@ -89,7 +93,14 @@ pub fn handle_alloc_error(_: Layout) -> ! {
 pub fn panic(info: &core::panic::PanicInfo) -> ! {
     crate::debug::no_cash_message("Panic! At the DS\0");
     if let Some(arg) = info.message() {
-        crate::debug::no_cash_message("There are args, but we can't read them yet");
+        let mut out = String::with_capacity(256);
+        if let Err(_) = write!(&mut out, "{}", arg) {
+            crate::debug::no_cash_message(
+                "Additionally, errors ocurred while trying to format the error message",
+            );
+        } else {
+            crate::debug::no_cash_message(out.as_str());
+        }
     }
     loop {
         crate::interrupts::swi_wait_for_v_blank();
