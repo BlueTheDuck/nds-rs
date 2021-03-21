@@ -5,6 +5,10 @@ pub static WIDTH: usize = 256;
 /// Height of the screens, in pixels
 pub static HEIGHT: usize = 192;
 
+
+/// Control registers related to video operations
+/// It is "technically" unsafe to use them, but you can't break
+/// Rust's safety with them
 pub mod registers {
     pub use nds_sys::video::VRAM_A;
 }
@@ -20,8 +24,8 @@ enum DisplayBg {
     Bg3 = bit!(11),
 }
 
-/// Constants to be used for REG_DISPCNT and REG_DISPCNT_SUB.
-/// The DS has 2 rendering engines, Main and Sub, that can be put in different modes (6 or 5 respectively).
+/// Constants to be used for [`set_mode`] and [`set_mode_sub`].
+/// The DS has 2 rendering engines, Main and Sub, that can be put in different modes (6 modes and 5 modes respectively).
 /// Mode6_2d and the ones suffixed "3D" are only valid for Main
 /// (The 3D engine renders on Background 0).
 /// Modes FB0-FB3 ("LCD" mode) map the Banks A-D respectively to pixels on screen.
@@ -55,12 +59,17 @@ pub enum Mode {
     ModeFb3 = 0x000E0000,
 }
 
+/// Sets video mode for Main
+/// To control whether this renders to the top LCD or the bottom one, use [`main_engine_on`](crate::system::main_engine_on)
 pub fn set_mode(mode: Mode) -> () {
     unsafe {
         nds_sys::video::REG_DISPCNT.write_volatile(mode as u32);
     }
 }
 
+/// Sets video mode for Sub
+/// Panics if an invalid mode is passed
+/// To control whether this renders to the top LCD or the bottom one, use [`main_engine_on`](crate::system::main_engine_on)
 pub fn set_mode_sub(mode: Mode) -> () {
     match mode {
         Mode::Mode0_3d

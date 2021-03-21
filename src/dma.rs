@@ -1,10 +1,11 @@
 //! The Nintendo DS contains a DMA (Direct Memory Access)
 //! hardware that allows the console to copy and fill
 //! memory sections without using the CPU
-//! All fill and copy operations are NOT synchronous, they return immediatly.
-//! Use `is_busy` and `wait_for` to check and wait for a channel
-
-use core::ops::BitAnd;
+//! The DMA can only respond to ONE channel at a time, and it will prioratize lower channels first.
+//! In case an operation is being processed, and a new one with a higher priority
+//! is received, the one with the lowest priority will be put on hold and the other will be fulfilled
+//! All functions here are NOT synchronous (except for [`wait_for`]), they return immediatly.
+//! Use [`is_busy`] and [`wait_for`] to check and wait for a channel to be available
 
 pub use nds_sys::dma::Channel;
 use nds_sys::dma::{calc_cr, calc_registers, Flags};
@@ -29,7 +30,8 @@ pub fn wait_for(ch: Channel) {
     }
 }
 
-/// Copies `len*4` bytes from `src` into `dst`.
+/// Fills `dst` with `len` words of `src`.
+/// This function operates in words (32 bits), so the amount of bytes copied will be `len*4`
 pub unsafe fn copy_words(ch: Channel, src: *const u32, dst: *mut u32, len: usize) {
     let (src_cr, dst_cr, cr, _) = calc_registers(ch);
     src_cr.write_volatile(src as *const usize);
@@ -38,7 +40,8 @@ pub unsafe fn copy_words(ch: Channel, src: *const u32, dst: *mut u32, len: usize
     cr.write_volatile(flags);
 }
 
-/// Copies `len*2` bytes from `src` into `dst`.
+/// Fills `dst` with `len` half words of `src`.
+/// This function operates in half words (16 bits), so the amount of bytes copied will be `len*2`
 pub unsafe fn copy_half_words(ch: Channel, src: *const u16, dst: *mut u16, len: usize) {
     let (src_cr, dst_cr, cr, _) = calc_registers(ch);
     src_cr.write_volatile(src as *const usize);
@@ -47,7 +50,8 @@ pub unsafe fn copy_half_words(ch: Channel, src: *const u16, dst: *mut u16, len: 
     cr.write_volatile(flags);
 }
 
-/// Fills `dst` with `len*4` copies of `value`.
+/// Fills `dst` with `len` copies of `value`.
+/// This function operates in words (32 bits), so the amount of bytes written will be `len*4`
 pub unsafe fn fill_words(ch: Channel, value: u32, dst: *mut u32, len: usize) {
     let (src_cr, dst_cr, cr, fill_cr) = calc_registers(ch);
     fill_cr.write_volatile(value as u32);
@@ -57,7 +61,8 @@ pub unsafe fn fill_words(ch: Channel, value: u32, dst: *mut u32, len: usize) {
     cr.write_volatile(flags);
 }
 
-/// Fills `dst` with `len*2` copies of `value`.
+/// Fills `dst` with `len` copies of `value`.
+/// This function operates in half words (16 bits), so the amount of bytes written will be `len*2`
 pub unsafe fn fill_half_words(ch: Channel, value: u16, dst: *mut u16, len: usize) {
     let (src_cr, dst_cr, cr, fill_cr) = calc_registers(ch);
     fill_cr.write_volatile(value as u32);

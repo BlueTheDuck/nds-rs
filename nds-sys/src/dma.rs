@@ -7,14 +7,13 @@ static mut BASE_CR: *mut u32 = 0x040000B8 as *mut u32;
 /// Base address that used to calculate the fill control reg. address for each channel
 static mut BASE_FILL: *mut u32 = 0x040000E0 as *mut u32;
 
-
 bitflags! {
     pub struct Flags: u32 {
         const ENABLED = 0b1_0_000_0_0_00_00_000000000000000000000;
         const ENABLE = 0b1_0_000_0_0_00_00_000000000000000000000;
-        
+
         const INT_REQ = 0b0_1_000_0_0_00_00_000000000000000000000;
-        
+
         const START_IMM = 0b0_0_000_0_0_00_00_000000000000000000000;
         const START_AT_VBLANK = 0b0_0_001_0_0_00_00_000000000000000000000;
         const START_AT_HBLANK = 0b0_0_010_0_0_00_00_000000000000000000000;
@@ -41,14 +40,17 @@ bitflags! {
     }
 }
 
-
-/// The DMA has 4 channels to operate
+/// The DMA has 4 "channels" to operate. Channels set the priority of the data being used, so when a request with a higher channel (read "prioriy") is made, the other is stopped and a new is started. Later the stopped one is resumed
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Channel {
+    /// Highest priority
     Ch0 = 0,
+    /// Second highest priority
     Ch1 = 1,
+    /// Third highest priority
     Ch2 = 2,
+    /// Lowest priority
     Ch3 = 3,
 }
 
