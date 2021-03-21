@@ -1,4 +1,4 @@
-use nds_sys::video::{*, self};
+use nds_sys::video::{self, *};
 
 /// Width of the screens, in pixels
 pub static WIDTH: usize = 256;
@@ -43,6 +43,7 @@ pub enum Mode {
     Mode5_3d = (Self::Mode5_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
     Mode6_3d = (Self::Mode6_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
 
+    /// Display directly from RAM
     ModeFifo = (3 << 16),
     /// Displays directly from Bank A in LCD mode
     ModeFb0 = 0x00020000,
@@ -86,40 +87,403 @@ macro_rules! vramOffset {
     };
 }
 
-pub mod VramA {
-    use nds_sys::video::{VRAM_A_CR, VRAM_ENABLE};
+/// Bank A (128KB)
+pub mod vram_a {
+    use nds_sys::video::{VRAM_A_CR as VRAM_CR, VRAM_ENABLE};
+
+    pub static MAIN_BG: BankMode = BankMode::MainBgSlot0;
+    pub static MAIN_SPRITE: BankMode = BankMode::MainSpriteSlot0;
+    pub static TEXTURE: BankMode = BankMode::TextureSlot0;
 
     /// Type of mapping that can be used with Bank A
     #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     pub enum BankMode {
-        /// Maps Bank A to lcd.
+        /// Maps Bank to LCD.
         Lcd = 0,
-        /// Maps Bank A to main engine background slot 0.
-        MainBg0x06000000 = 1 | vramOffset!(0),
-        /// Maps Bank A to main engine background slot 1.
-        MainBg0x06020000 = 1 | vramOffset!(1),
-        /// Maps Bank A to main engine background slot 2.
-        MainBg0x06040000 = 1 | vramOffset!(2),
-        /// Maps Bank A to main engine background slot 3.
-        MainBg0x06060000 = 1 | vramOffset!(3),
-        /// Maps Bank A to main engine sprites slot 0.
-        MainSprite0x06400000 = 2 | vramOffset!(0),
-        /// Maps Bank A to main engine sprites slot 1.
-        MainSprite0x06420000 = 2 | vramOffset!(1),
-        /// Maps Bank A to 3d texture slot 0.
+
+        /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
+        MainBgSlot0 = 1 | vramOffset!(0),
+        /// Maps Bank to Main's background slot 1. (Address: 0x06020000)
+        MainBgSlot1 = 1 | vramOffset!(1),
+        /// Maps Bank to Main's background slot 2. (Address: 0x06040000)
+        MainBgSlot2 = 1 | vramOffset!(2),
+        /// Maps Bank to Main's background slot 3. (Address: 0x06060000)
+        MainBgSlot3 = 1 | vramOffset!(3),
+
+        /// Maps Bank to Main's sprites slot 0. (Address: 0x06400000)
+        MainSpriteSlot0 = 2 | vramOffset!(0),
+        /// Maps Bank to Main's sprites slot 1. (Address: 0x06420000)
+        MainSpriteSlot1 = 2 | vramOffset!(1),
+
+        /// Maps Bank to 3D texture slot 0.
         TextureSlot0 = 3 | vramOffset!(0),
-        /// Maps Bank A to 3d texture slot 1.
+        /// Maps Bank to 3D texture slot 1.
         TextureSlot1 = 3 | vramOffset!(1),
-        /// Maps Bank A to 3d texture slot 2.
+        /// Maps Bank to 3D texture slot 2.
         TextureSlot2 = 3 | vramOffset!(2),
-        /// Maps Bank A to 3d texture slot 3.
+        /// Maps Bank to 3D texture slot 3.
         TextureSlot3 = 3 | vramOffset!(3),
     }
 
     /// Sets the mapping for Bank A
     pub fn set_bank_mode(mode: BankMode) {
         unsafe {
-            VRAM_A_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+        }
+    }
+}
+
+/// Bank B (128KB)
+pub mod vram_b {
+    use nds_sys::video::{VRAM_B_CR as VRAM_CR, VRAM_ENABLE};
+
+    pub static MAIN_BG: BankMode = BankMode::MainBgSlot1;
+    pub static MAIN_SPRITE: BankMode = BankMode::MainSpriteSlot0;
+    pub static TEXTURE: BankMode = BankMode::TextureSlot1;
+
+    /// Type of mapping that can be used with Bank B
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum BankMode {
+        /// Maps Bank to LCD.
+        Lcd = 0,
+
+        /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
+        MainBgSlot0 = 1 | vramOffset!(0),
+        /// Maps Bank to Main's background slot 1. (Address: 0x06020000)
+        MainBgSlot1 = 1 | vramOffset!(1),
+        /// Maps Bank to Main's background slot 2. (Address: 0x06040000)
+        MainBgSlot2 = 1 | vramOffset!(2),
+        /// Maps Bank to Main's background slot 3. (Address: 0x06060000)
+        MainBgSlot3 = 1 | vramOffset!(3),
+
+        /// Maps Bank to Main's sprites slot 0. (Address: 0x06400000)
+        MainSpriteSlot0 = 2 | vramOffset!(0),
+        /// Maps Bank to Main's sprites slot 1. (Address: 0x06420000)
+        MainSpriteSlot1 = 2 | vramOffset!(1),
+
+        /// Maps Bank to 3D texture slot 0.
+        TextureSlot0 = 3 | vramOffset!(0),
+        /// Maps Bank to 3D texture slot 1.
+        TextureSlot1 = 3 | vramOffset!(1),
+        /// Maps Bank to 3D texture slot 2.
+        TextureSlot2 = 3 | vramOffset!(2),
+        /// Maps Bank to 3D texture slot 3.
+        TextureSlot3 = 3 | vramOffset!(3),
+    }
+
+    /// Sets the mapping for Bank B
+    pub fn set_bank_mode(mode: BankMode) {
+        unsafe {
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+        }
+    }
+}
+
+/// Bank C (128KB)
+pub mod vram_c {
+    use nds_sys::video::{VRAM_C_CR as VRAM_CR, VRAM_ENABLE};
+
+    pub static MAIN_BG: BankMode = BankMode::MainBgSlot2;
+    pub static ARM7: BankMode = BankMode::Arm7Slot0;
+    pub static TEXTURE: BankMode = BankMode::TextureSlot2;
+
+    /// Type of mapping that can be used with Bank C
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum BankMode {
+        /// Maps Bank to LCD.
+        Lcd = 0,
+
+        /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
+        MainBgSlot0 = 1 | vramOffset!(0),
+        /// Maps Bank to Main's background slot 1. (Address: 0x06020000)
+        MainBgSlot1 = 1 | vramOffset!(1),
+        /// Maps Bank to Main's background slot 2. (Address: 0x06040000)
+        MainBgSlot2 = 1 | vramOffset!(2),
+        /// Maps Bank to Main's background slot 3. (Address: 0x06060000)
+        MainBgSlot3 = 1 | vramOffset!(3),
+
+        /// Maps Bank to workram slot 0 of the ARM7. (Address: 0x06000000)
+        Arm7Slot0 = 2 | vramOffset!(0),
+        /// Maps Bank to workram slot 1 of the ARM7. (Address: 0x06020000)
+        Arm7Slot1 = 2 | vramOffset!(1),
+
+        /// Maps Bank to Sub's background slot 0. (Address: 0x06200000)
+        SubBgSlot0 = 4 | vramOffset!(0),
+
+        /// Maps Bank to 3d texture slot 0.
+        TextureSlot0 = 3 | vramOffset!(0),
+        /// Maps Bank to 3d texture slot 1.
+        TextureSlot1 = 3 | vramOffset!(1),
+        /// Maps Bank to 3d texture slot 2.
+        TextureSlot2 = 3 | vramOffset!(2),
+        /// Maps Bank to 3d texture slot 3.
+        TextureSlot3 = 3 | vramOffset!(3),
+    }
+
+    /// Sets the mapping for Bank A
+    pub fn set_bank_mode(mode: BankMode) {
+        unsafe {
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+        }
+    }
+}
+
+/// Bank D (128KB)
+pub mod vram_d {
+    use nds_sys::video::{VRAM_C_CR as VRAM_CR, VRAM_ENABLE};
+
+    pub static MAIN_BG: BankMode = BankMode::MainBgSlot3;
+    pub static ARM7: BankMode = BankMode::Arm7Slot1;
+    pub static TEXTURE: BankMode = BankMode::TextureSlot3;
+
+    /// Type of mapping that can be used with Bank D
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum BankMode {
+        /// Maps Bank to LCD.
+        Lcd = 0,
+
+        /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
+        MainBgSlot0 = 1 | vramOffset!(0),
+        /// Maps Bank to Main's background slot 1. (Address: 0x06020000)
+        MainBgSlot1 = 1 | vramOffset!(1),
+        /// Maps Bank to Main's background slot 2. (Address: 0x06040000)
+        MainBgSlot2 = 1 | vramOffset!(2),
+        /// Maps Bank to Main's background slot 3. (Address: 0x06060000)
+        MainBgSlot3 = 1 | vramOffset!(3),
+
+        /// Maps Bank to workram slot 0 of the ARM7. (Address: 0x06000000)
+        Arm7Slot0 = 2 | vramOffset!(0),
+        /// Maps Bank to workram slot 1 of the ARM7. (Address: 0x06020000)
+        Arm7Slot1 = 2 | vramOffset!(1),
+
+        /// Maps Bank to Sub's sprite slot 0. (Address: 0x06200000)
+        SubSpriteSlot0 = 4 | vramOffset!(0),
+
+        /// Maps Bank to 3D texture slot 0.
+        TextureSlot0 = 3 | vramOffset!(0),
+        /// Maps Bank to 3D texture slot 1.
+        TextureSlot1 = 3 | vramOffset!(1),
+        /// Maps Bank to 3D texture slot 2.
+        TextureSlot2 = 3 | vramOffset!(2),
+        /// Maps Bank to 3D texture slot 3.
+        TextureSlot3 = 3 | vramOffset!(3),
+    }
+
+    /// Sets the mapping for Bank D
+    pub fn set_bank_mode(mode: BankMode) {
+        unsafe {
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+        }
+    }
+}
+
+/// Bank E (64KB)
+pub mod vram_e {
+    use nds_sys::video::{VRAM_ENABLE, VRAM_E_CR as VRAM_CR};
+
+    /// Type of mapping that can be used with Bank E
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum BankMode {
+        /// Maps Bank to LCD.
+        Lcd = 0,
+
+        /// Maps Bank to Main's background, first half, slot 0
+        MainBg = 1,
+
+        /// Maps Bank to Main's sprites, first half, slot 0
+        MainSprite = 2,
+
+        /// Maps Bank to 3D texture palette slots 0-3
+        TexturePalette = 3,
+
+        /// Maps Bank to Main's background extended palette
+        BgExtendedPalette = 4,
+    }
+
+    /// Sets the mapping for Bank E
+    pub fn set_bank_mode(mode: BankMode) {
+        unsafe {
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+        }
+    }
+}
+
+/// Bank F (16KB)
+pub mod vram_f {
+    use nds_sys::video::{VRAM_ENABLE, VRAM_F_CR as VRAM_CR};
+
+    pub static MAIN_BG: BankMode = BankMode::MainBgFirstPart;
+    pub static MAIN_SPRITE: BankMode = BankMode::MainSpriteFirstPart;
+    pub static TEXTURE_PALETTE: BankMode = BankMode::TexturePaletteSlot0;
+    pub static BG_EXT_PALETTE: BankMode = BankMode::BgExtPaletteSlot01;
+
+    /// Type of mapping that can be used with Bank F
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum BankMode {
+        /// Maps Bank to LCD.
+        Lcd = 0,
+
+        /// Maps Bank to Main's background first part, first half, slot 0. (Address: 0x06000000)
+        MainBgFirstPart = 1 | vramOffset!(0),
+        /// Maps Bank to Main's background second part, first half, slot 0. (Address: 0x06004000)
+        MainBgSecondPart = 1 | vramOffset!(1),
+        /// Maps Bank to Main's background first part, second half, slot 0. (Address: 0x06010000)
+        MainBgFirstPartSecondHalf = 1 | vramOffset!(2),
+        /// Maps Bank to Main's background second part, second half, slot 0. (Address: 0x06014000)
+        MainBgSecondPartSecondHalf = 1 | vramOffset!(3),
+
+        /// Maps Bank to Main sprites first part of slot 0 (Address: 0x06400000)
+        MainSpriteFirstPart = 2 | vramOffset!(0),
+        /// Maps Bank to Main sprites second part of slot 0 (Address: 0x06404000)
+        MainSpriteSecondPart = 2 | vramOffset!(1),
+        /// Maps Bank to Main sprites first part, second half  (Address: 0x06410000)
+        MainSpriteFirstPartSecondHalf = 2 | vramOffset!(2),
+        /// Maps Bank to Main sprites second part, second half (Address: 0x06414000)
+        MainSpriteSecondPartSecondHalf = 2 | vramOffset!(3),
+
+        /// Maps Bank to 3D texture palette slot 0
+        TexturePaletteSlot0 = 3 | vramOffset!(0),
+        /// Maps Bank to 3D texture palette slot 1
+        TexturePaletteSlot1 = 3 | vramOffset!(1),
+        /// Maps Bank to 3D texture palette slot 4
+        TexturePaletteSlot4 = 3 | vramOffset!(2),
+        /// Maps Bank to 3D texture palette slot 5
+        TexturePaletteSlot5 = 3 | vramOffset!(3),
+
+        /// Maps Bank to Main background extended palette, slots 0 and 1
+        BgExtPaletteSlot01 = 4 | vramOffset!(0),
+        /// Maps Bank to Main background extended palette, slots 2 and 3
+        BgExtPaletteSlot23 = 4 | vramOffset!(1),
+
+        /// Maps Bank to Main sprites extended palette
+        SpriteExtPalette = 5,
+    }
+
+    /// Sets the mapping for Bank F
+    pub fn set_bank_mode(mode: BankMode) {
+        unsafe {
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+        }
+    }
+}
+
+/// Bank G (16KB)
+pub mod vram_g {
+    use nds_sys::video::{VRAM_ENABLE, VRAM_G_CR as VRAM_CR};
+
+    pub static MAIN_BG: BankMode = BankMode::MainBgFirstPart;
+    pub static MAIN_SPRITE: BankMode = BankMode::MainSpriteFirstPart;
+    pub static TEXTURE_PALETTE: BankMode = BankMode::TexturePaletteSlot0;
+    pub static BG_EXT_PALETTE: BankMode = BankMode::BgExtPaletteSlot01;
+
+    /// Type of mapping that can be used with Bank G
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum BankMode {
+        /// Maps Bank to LCD.
+        Lcd = 0,
+
+        /// Maps Bank to Main's background first part, first half, slot 0. (Address: 0x06000000)
+        MainBgFirstPart = 1 | vramOffset!(0),
+        /// Maps Bank to Main's background second part, first half, slot 0. (Address: 0x06004000)
+        MainBgSecondPart = 1 | vramOffset!(1),
+        /// Maps Bank to Main's background first part, second half, slot 0. (Address: 0x06010000)
+        MainBgFirstPartSecondHalf = 1 | vramOffset!(2),
+        /// Maps Bank to Main's background second part, second half, slot 0. (Address: 0x06014000)
+        MainBgSecondPartSecondHalf = 1 | vramOffset!(3),
+
+        /// Maps Bank to Main sprites first part of slot 0 (Address: 0x06400000)
+        MainSpriteFirstPart = 2 | vramOffset!(0),
+        /// Maps Bank to Main sprites second part of slot 0 (Address: 0x06404000)
+        MainSpriteSecondPart = 2 | vramOffset!(1),
+        /// Maps Bank to Main sprites first part, second half  (Address: 0x06410000)
+        MainSpriteFirstPartSecondHalf = 2 | vramOffset!(2),
+        /// Maps Bank to Main sprites second part, second half (Address: 0x06414000)
+        MainSpriteSecondPartSecondHalf = 2 | vramOffset!(3),
+
+        /// Maps Bank to 3D texture palette slot 0
+        TexturePaletteSlot0 = 3 | vramOffset!(0),
+        /// Maps Bank to 3D texture palette slot 1
+        TexturePaletteSlot1 = 3 | vramOffset!(1),
+        /// Maps Bank to 3D texture palette slot 4
+        TexturePaletteSlot4 = 3 | vramOffset!(2),
+        /// Maps Bank to 3D texture palette slot 5
+        TexturePaletteSlot5 = 3 | vramOffset!(3),
+
+        /// Maps Bank to Main background extended palette, slots 0 and 1
+        BgExtPaletteSlot01 = 4 | vramOffset!(0),
+        /// Maps Bank to Main background extended palette, slots 2 and 3
+        BgExtPaletteSlot23 = 4 | vramOffset!(1),
+
+        /// Maps Bank to Main sprites extended palette
+        SpriteExtPalette = 5,
+    }
+
+    /// Sets the mapping for Bank G
+    pub fn set_bank_mode(mode: BankMode) {
+        unsafe {
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+        }
+    }
+}
+
+/// Bank H (32KB)
+pub mod vram_h {
+    use nds_sys::video::{VRAM_ENABLE, VRAM_H_CR as VRAM_CR};
+
+    /// Type of mapping that can be used with Bank H
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum BankMode {
+        /// Maps Bank to LCD.
+        Lcd = 0,
+
+        /// Maps Bank to Sub's background first 2 parts of slot 0
+        SubBg = 1,
+
+        /// Maps Bank to Sub's background extended palette
+        SubBgExtPalette = 2,
+    }
+
+    /// Sets the mapping for Bank H
+    pub fn set_bank_mode(mode: BankMode) {
+        unsafe {
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
+        }
+    }
+}
+
+/// Bank I (16KB)
+pub mod vram_i {
+    use nds_sys::video::{VRAM_ENABLE, VRAM_I_CR as VRAM_CR};
+
+    /// Type of mapping that can be used with Bank I
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum BankMode {
+        /// Maps Bank to LCD.
+        Lcd = 0,
+
+        /// Maps Bank to Sub's background thirth part of slot 0. (Address: 0x06208000)
+        SubBg0 = 1,
+
+        /// Maps Bank to Sub's sprites
+        SubSprite = 2,
+
+        /// Maps Bank to Sub's sprites extended palette
+        SubSpriteExtPalette = 3,
+    }
+
+    /// Sets the mapping for Bank I
+    pub fn set_bank_mode(mode: BankMode) {
+        unsafe {
+            VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
         }
     }
 }
