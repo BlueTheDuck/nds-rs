@@ -1,5 +1,3 @@
-use nds_sys::video::{self, *};
-
 /// Width of the screens, in pixels
 pub static WIDTH: usize = 256;
 /// Height of the screens, in pixels
@@ -83,6 +81,9 @@ pub fn set_mode_sub(mode: Mode) -> () {
         }
         Mode::Mode6_2d => {
             panic!("Mode 6 is not valid for Sub engine");
+        }
+        Mode::ModeFb0 | Mode::ModeFb1 | Mode::ModeFb2 | Mode::ModeFb3 => {
+            panic!("Modes Fb0-Fb3 are not valid for Sub engine");
         }
         _ => unsafe {
             nds_sys::video::REG_DISPCNT_SUB.write_volatile(mode as u32);
@@ -232,7 +233,7 @@ pub mod vram_c {
         TextureSlot3 = 3 | vramOffset!(3),
     }
 
-    /// Sets the mapping for Bank A
+    /// Sets the mapping for Bank C
     pub fn set_bank_mode(mode: BankMode) {
         unsafe {
             VRAM_CR.write_volatile(VRAM_ENABLE | (mode as u8));
