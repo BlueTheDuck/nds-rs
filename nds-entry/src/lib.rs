@@ -2,6 +2,7 @@ use proc_macro::TokenStream;
 use quote::{__private::ext::RepToTokensExt, quote};
 use syn::{parse_macro_input, ItemFn};
 
+/// ROM entry point
 #[proc_macro_attribute]
 pub fn entry(_: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemFn);
