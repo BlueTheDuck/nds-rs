@@ -74,7 +74,7 @@ pub unsafe fn fill_half_words(ch: Channel, value: u16, dst: *mut u16, len: usize
     cr.write_volatile(flags);
 }
 
-/// Copies `src` into `dst` using DMA channel 3. 
+/// Copies `src` into `dst` using DMA channel 3.
 /// Hangs if the channel is busy.
 /// Panics if `size_of::<T>()` is neither 2 nor 4
 /// In case `src.len() != dst.len()` then only `min(src.len(), dst.len())` elements will be copied.
@@ -94,7 +94,7 @@ where
             flags |= Flags::HALFWORDS;
         }
         _ => {
-            panic!("Can only run clone<T>() if T is either 2 or 4 bytes");
+            panic!("Can only run copy<T>() if T is either 2 or 4 bytes");
         }
     }
     let flags: u32 = flags.bits() | core::cmp::min(src.len(), dst.len()) as u32;
@@ -105,7 +105,53 @@ where
     }
 }
 
-/// Fills `dst` by copying `value` using DMA channel 3. 
+/// Copies `len` elements from `src`. Starts copying at `from`, and copies to `to`.
+/// Hangs if the channel is busy.
+/// Panics if `size_of::<T>()` is neither 2 nor 4; but doesn't do any bounds check
+/// `T` must be `Sized + Copy`, to prevent the copying of non-`Copy` elements.
+pub unsafe fn copy_within_unchecked<T>(src: &mut [T], from: usize, to: usize, len: usize)
+where
+    T: Sized + Copy,
+{
+    wait_for(Channel::Ch3);
+    let (src_cr, dst_cr, cr, _) = calc_registers(Channel::Ch3);
+    let mut flags: Flags = Flags::ENABLE;
+    match size_of::<T>() {
+        4 => {
+            flags |= Flags::WORDS;
+        }
+        2 => {
+            flags |= Flags::HALFWORDS;
+        }
+        _ => {
+            panic!("Can only run copy<T>() if size_of::<T>() is either 2 or 4 bytes");
+        }
+    }
+    let flags: u32 = flags.bits() | len as u32;
+    let src = src.as_mut_ptr() as *mut T;
+    src_cr.write_volatile(src.add(from) as *const usize);
+    dst_cr.write_volatile(src.add(to) as *mut usize);
+    cr.write_volatile(flags);
+}
+
+/// Copies `len` elements from `src`. Starts copying at `from`, and copies to `to`.
+/// Hangs if the channel is busy.
+/// Panics if `size_of::<T>()` is neither 2 nor 4.
+/// `T` must be `Sized + Copy`, to prevent the copying of non-`Copy` elements.
+pub fn copy_within<T>(src: &mut [T], from: usize, to: usize, len: usize) -> Result<(), ()>
+where
+    T: Sized + Copy,
+{
+    // Out-of-bounds read || Out-of-bounds write
+    if src.len() < from + len || src.len() < to + len {
+        return Err(());
+    }
+    //debug_assert!(to <= from || to > from+len,"The segments to be copied overlap");
+    unsafe { copy_within_unchecked::<T>(src, from, to, len) }
+    return Ok(());
+}
+
+/// Fills `dst` by copying `value` using DMA channel 3.
 /// Hangs if the channel is busy.
 /// Panics if `size_of::<T>()` is neither 2 nor 4.
 /// `T` must be `Sized + Copy`, to prevent the copying of non-`Copy` elements.
