@@ -13,3 +13,4 @@ pub mod input;
 pub mod video;
 pub mod interrupts;
 pub mod dma;
+pub mod system;

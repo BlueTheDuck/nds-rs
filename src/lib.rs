@@ -20,6 +20,7 @@ pub mod input;
 pub mod interrupts;
 pub mod video;
 pub mod dma;
+pub mod system;
 
 pub mod debug {
     extern "C" {
