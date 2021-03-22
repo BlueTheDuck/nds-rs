@@ -42,7 +42,12 @@ bitflags! {
     }
 }
 
-/// The DMA has 4 "channels" to operate. Channels set the priority of the data being used, so when a request with a higher channel (read "prioriy") is made, the other is stopped and a new is started. Later the stopped one is resumed
+/// The DMA has 4 "channels" to operate.
+/// Channels set the priority of operation being processed, 
+/// so when multiple operations are scheduled, the one with the
+/// highest priority (= lowest channel) is resolved first. If another
+/// operation with a lower priority is being processed, then it is stopped 
+/// and later resumed
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Channel {
