@@ -1,5 +1,3 @@
-use nds_sys::system;
-
 /// Shuts down the console
 pub fn shutdown() {
     unsafe {

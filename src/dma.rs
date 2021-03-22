@@ -7,6 +7,8 @@
 //! All functions here are NOT synchronous (except for [`wait_for`]), they return immediatly.
 //! Use [`is_busy`] and [`wait_for`] to check and wait for a channel to be available
 
+use core::mem::size_of;
+
 pub use nds_sys::dma::Channel;
 use nds_sys::dma::{calc_cr, calc_registers, Flags};
 

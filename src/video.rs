@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 /// Width of the screens, in pixels
 pub static WIDTH: usize = 256;
 /// Height of the screens, in pixels

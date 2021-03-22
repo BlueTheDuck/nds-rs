@@ -1,3 +1,5 @@
+#![allow(unused_parens)]
+
 /// Base address that used to calculate the src. control reg. address for each channel
 static mut BASE_SRC: *mut (*const usize) = 0x040000B0 as *mut (*const usize);
 /// Base address that used to calculate the dst. control reg. address for each channel
