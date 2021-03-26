@@ -29,6 +29,12 @@ pub static mut VRAM_I_CR: *mut u8 = 0x04000249 as *mut u8;
 
 /// When VRAM A is in LCD mode, this points to the first pixel (top left most)
 pub static mut VRAM_A: *mut u16 = 0x6800000 as *mut u16;
+/// When VRAM B is in LCD mode, this points to the first pixel (top left most)
+pub static mut VRAM_B: *mut u16 = 0x6820000 as *mut u16;
+/// When VRAM C is in LCD mode, this points to the first pixel (top left most)
+pub static mut VRAM_C: *mut u16 = 0x6840000 as *mut u16;
+/// When VRAM D is in LCD mode, this points to the first pixel (top left most)
+pub static mut VRAM_D: *mut u16 = 0x6860000 as *mut u16;
 
 /// Background palette (Main)
 pub static mut BG_PALETTE: *mut u16 = 0x05000000 as *mut u16;

@@ -10,7 +10,7 @@ pub static HEIGHT: usize = 192;
 /// It is "technically" unsafe to use them, but you can't break
 /// Rust's safety with them
 pub mod registers {
-    pub use nds_sys::video::VRAM_A;
+    pub use nds_sys::video::{VRAM_A, VRAM_B, VRAM_C, VRAM_D};
 }
 
 const MODE_ENABLE_3D: u32 = 1 << 3;
