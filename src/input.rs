@@ -1,5 +1,5 @@
-use nds_sys::input::*;
 pub use nds_sys::input::TouchPosition;
+use nds_sys::input::*;
 
 pub fn scan_keys() {
     unsafe {

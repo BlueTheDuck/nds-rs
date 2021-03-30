@@ -1,5 +1,5 @@
 pub use interrupts::Flags;
-use nds_sys::interrupts::{self, swiIntrWait, swiWaitForVBlank, irqEnable, irqDisable};
+use nds_sys::interrupts::{self, irqDisable, irqEnable, swiIntrWait, swiWaitForVBlank};
 
 pub mod registers {
     pub use nds_sys::interrupts::{REG_IE, REG_IME};
@@ -24,7 +24,8 @@ pub fn swi_intr_wait(flags: Flags, wait_for_next: bool) {
 
 /// Enable the interrupts specified in `irq`.
 /// OR different flags to enable many interrupts at once.
-/// This function is unsafe since changing the state of interrupts
+/// # Safety
+/// This function should not be called since changing the state of interrupts
 /// can (will!) break other code (for example: [`wait_for`](crate::dma::wait_for))
 pub unsafe fn irq_enable(irq: Flags) {
     irqEnable(irq.bits());
@@ -32,7 +33,8 @@ pub unsafe fn irq_enable(irq: Flags) {
 
 /// Disable the interrupts specified in `irq`.
 /// OR different flags to disable many interrupts at once.
-/// This function is unsafe since changing the state of interrupts
+/// # Safety
+/// This function should not be called since changing the state of interrupts
 /// can (will!) break other code (for example: [`wait_for`](crate::dma::wait_for))
 pub unsafe fn irq_disable(irq: Flags) {
     irqDisable(irq.bits());

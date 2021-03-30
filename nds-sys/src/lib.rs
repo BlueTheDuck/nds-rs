@@ -9,8 +9,8 @@ macro_rules! bit {
     };
 }
 
-pub mod input;
-pub mod video;
-pub mod interrupts;
 pub mod dma;
+pub mod input;
+pub mod interrupts;
 pub mod system;
+pub mod video;

@@ -15,5 +15,3 @@ bitflags! {
         const SWAP_LCD = bit!(15);
     }
 }
-
-

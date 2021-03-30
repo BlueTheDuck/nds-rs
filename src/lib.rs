@@ -3,6 +3,7 @@
 #![feature(alloc_error_handler)]
 
 pub use nds_entry::entry;
+pub use nds_sys as sys;
 
 extern crate alloc;
 
@@ -16,11 +17,11 @@ macro_rules! bit {
     };
 }
 
+pub mod dma;
 pub mod input;
 pub mod interrupts;
-pub mod video;
-pub mod dma;
 pub mod system;
+pub mod video;
 
 pub mod debug {
     extern "C" {
@@ -41,7 +42,7 @@ pub mod debug {
 type CPtr = *mut core::ffi::c_void;
 extern "C" {
     fn malloc(size: usize) -> CPtr;
-    fn free(ptr: CPtr) -> ();
+    fn free(ptr: CPtr);
     fn calloc(num: usize, size: usize) -> CPtr;
     fn realloc(ptr: CPtr, size: usize) -> CPtr;
 }
@@ -94,12 +95,12 @@ pub fn panic(info: &core::panic::PanicInfo) -> ! {
     crate::debug::no_cash_message("Panic! At the DS\0");
     if let Some(arg) = info.message() {
         let mut out = String::with_capacity(256);
-        if let Err(_) = write!(&mut out, "{}", arg) {
+        if write!(&mut out, "{}", arg).is_ok() {
+            crate::debug::no_cash_message(out.as_str());
+        } else {
             crate::debug::no_cash_message(
                 "Additionally, errors ocurred while trying to format the error message",
             );
-        } else {
-            crate::debug::no_cash_message(out.as_str());
         }
     }
     loop {

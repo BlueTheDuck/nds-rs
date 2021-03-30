@@ -5,7 +5,6 @@ pub static WIDTH: usize = 256;
 /// Height of the screens, in pixels
 pub static HEIGHT: usize = 192;
 
-
 /// Control registers related to video operations
 /// It is "technically" unsafe to use them, but you can't break
 /// Rust's safety with them
@@ -61,7 +60,7 @@ pub enum Mode {
 
 /// Sets video mode for Main
 /// To control whether this renders to the top LCD or the bottom one, use [`main_engine_on`](crate::system::main_engine_on)
-pub fn set_mode(mode: Mode) -> () {
+pub fn set_mode(mode: Mode) {
     unsafe {
         nds_sys::video::REG_DISPCNT.write_volatile(mode as u32);
     }
@@ -70,7 +69,7 @@ pub fn set_mode(mode: Mode) -> () {
 /// Sets video mode for Sub
 /// Panics if an invalid mode is passed
 /// To control whether this renders to the top LCD or the bottom one, use [`main_engine_on`](crate::system::main_engine_on)
-pub fn set_mode_sub(mode: Mode) -> () {
+pub fn set_mode_sub(mode: Mode) {
     match mode {
         Mode::Mode0_3d
         | Mode::Mode1_3d
@@ -115,7 +114,7 @@ pub mod vram_a {
         Lcd = 0,
 
         /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
-        MainBgSlot0 = 1 | vramOffset!(0),
+        MainBgSlot0 = 1,
         /// Maps Bank to Main's background slot 1. (Address: 0x06020000)
         MainBgSlot1 = 1 | vramOffset!(1),
         /// Maps Bank to Main's background slot 2. (Address: 0x06040000)
@@ -124,12 +123,12 @@ pub mod vram_a {
         MainBgSlot3 = 1 | vramOffset!(3),
 
         /// Maps Bank to Main's sprites slot 0. (Address: 0x06400000)
-        MainSpriteSlot0 = 2 | vramOffset!(0),
+        MainSpriteSlot0 = 2,
         /// Maps Bank to Main's sprites slot 1. (Address: 0x06420000)
         MainSpriteSlot1 = 2 | vramOffset!(1),
 
         /// Maps Bank to 3D texture slot 0.
-        TextureSlot0 = 3 | vramOffset!(0),
+        TextureSlot0 = 3,
         /// Maps Bank to 3D texture slot 1.
         TextureSlot1 = 3 | vramOffset!(1),
         /// Maps Bank to 3D texture slot 2.
@@ -162,7 +161,7 @@ pub mod vram_b {
         Lcd = 0,
 
         /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
-        MainBgSlot0 = 1 | vramOffset!(0),
+        MainBgSlot0 = 1,
         /// Maps Bank to Main's background slot 1. (Address: 0x06020000)
         MainBgSlot1 = 1 | vramOffset!(1),
         /// Maps Bank to Main's background slot 2. (Address: 0x06040000)
@@ -171,12 +170,12 @@ pub mod vram_b {
         MainBgSlot3 = 1 | vramOffset!(3),
 
         /// Maps Bank to Main's sprites slot 0. (Address: 0x06400000)
-        MainSpriteSlot0 = 2 | vramOffset!(0),
+        MainSpriteSlot0 = 2,
         /// Maps Bank to Main's sprites slot 1. (Address: 0x06420000)
         MainSpriteSlot1 = 2 | vramOffset!(1),
 
         /// Maps Bank to 3D texture slot 0.
-        TextureSlot0 = 3 | vramOffset!(0),
+        TextureSlot0 = 3,
         /// Maps Bank to 3D texture slot 1.
         TextureSlot1 = 3 | vramOffset!(1),
         /// Maps Bank to 3D texture slot 2.
@@ -209,7 +208,7 @@ pub mod vram_c {
         Lcd = 0,
 
         /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
-        MainBgSlot0 = 1 | vramOffset!(0),
+        MainBgSlot0 = 1,
         /// Maps Bank to Main's background slot 1. (Address: 0x06020000)
         MainBgSlot1 = 1 | vramOffset!(1),
         /// Maps Bank to Main's background slot 2. (Address: 0x06040000)
@@ -218,15 +217,15 @@ pub mod vram_c {
         MainBgSlot3 = 1 | vramOffset!(3),
 
         /// Maps Bank to workram slot 0 of the ARM7. (Address: 0x06000000)
-        Arm7Slot0 = 2 | vramOffset!(0),
+        Arm7Slot0 = 2,
         /// Maps Bank to workram slot 1 of the ARM7. (Address: 0x06020000)
         Arm7Slot1 = 2 | vramOffset!(1),
 
         /// Maps Bank to Sub's background slot 0. (Address: 0x06200000)
-        SubBgSlot0 = 4 | vramOffset!(0),
+        SubBgSlot0 = 4,
 
         /// Maps Bank to 3d texture slot 0.
-        TextureSlot0 = 3 | vramOffset!(0),
+        TextureSlot0 = 3,
         /// Maps Bank to 3d texture slot 1.
         TextureSlot1 = 3 | vramOffset!(1),
         /// Maps Bank to 3d texture slot 2.
@@ -259,7 +258,7 @@ pub mod vram_d {
         Lcd = 0,
 
         /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
-        MainBgSlot0 = 1 | vramOffset!(0),
+        MainBgSlot0 = 1,
         /// Maps Bank to Main's background slot 1. (Address: 0x06020000)
         MainBgSlot1 = 1 | vramOffset!(1),
         /// Maps Bank to Main's background slot 2. (Address: 0x06040000)
@@ -268,15 +267,15 @@ pub mod vram_d {
         MainBgSlot3 = 1 | vramOffset!(3),
 
         /// Maps Bank to workram slot 0 of the ARM7. (Address: 0x06000000)
-        Arm7Slot0 = 2 | vramOffset!(0),
+        Arm7Slot0 = 2,
         /// Maps Bank to workram slot 1 of the ARM7. (Address: 0x06020000)
         Arm7Slot1 = 2 | vramOffset!(1),
 
         /// Maps Bank to Sub's sprite slot 0. (Address: 0x06200000)
-        SubSpriteSlot0 = 4 | vramOffset!(0),
+        SubSpriteSlot0 = 4,
 
         /// Maps Bank to 3D texture slot 0.
-        TextureSlot0 = 3 | vramOffset!(0),
+        TextureSlot0 = 3,
         /// Maps Bank to 3D texture slot 1.
         TextureSlot1 = 3 | vramOffset!(1),
         /// Maps Bank to 3D texture slot 2.
@@ -342,7 +341,7 @@ pub mod vram_f {
         Lcd = 0,
 
         /// Maps Bank to Main's background first part, first half, slot 0. (Address: 0x06000000)
-        MainBgFirstPart = 1 | vramOffset!(0),
+        MainBgFirstPart = 1,
         /// Maps Bank to Main's background second part, first half, slot 0. (Address: 0x06004000)
         MainBgSecondPart = 1 | vramOffset!(1),
         /// Maps Bank to Main's background first part, second half, slot 0. (Address: 0x06010000)
@@ -351,7 +350,7 @@ pub mod vram_f {
         MainBgSecondPartSecondHalf = 1 | vramOffset!(3),
 
         /// Maps Bank to Main sprites first part of slot 0 (Address: 0x06400000)
-        MainSpriteFirstPart = 2 | vramOffset!(0),
+        MainSpriteFirstPart = 2,
         /// Maps Bank to Main sprites second part of slot 0 (Address: 0x06404000)
         MainSpriteSecondPart = 2 | vramOffset!(1),
         /// Maps Bank to Main sprites first part, second half  (Address: 0x06410000)
@@ -360,7 +359,7 @@ pub mod vram_f {
         MainSpriteSecondPartSecondHalf = 2 | vramOffset!(3),
 
         /// Maps Bank to 3D texture palette slot 0
-        TexturePaletteSlot0 = 3 | vramOffset!(0),
+        TexturePaletteSlot0 = 3,
         /// Maps Bank to 3D texture palette slot 1
         TexturePaletteSlot1 = 3 | vramOffset!(1),
         /// Maps Bank to 3D texture palette slot 4
@@ -369,7 +368,7 @@ pub mod vram_f {
         TexturePaletteSlot5 = 3 | vramOffset!(3),
 
         /// Maps Bank to Main background extended palette, slots 0 and 1
-        BgExtPaletteSlot01 = 4 | vramOffset!(0),
+        BgExtPaletteSlot01 = 4,
         /// Maps Bank to Main background extended palette, slots 2 and 3
         BgExtPaletteSlot23 = 4 | vramOffset!(1),
 
@@ -402,7 +401,7 @@ pub mod vram_g {
         Lcd = 0,
 
         /// Maps Bank to Main's background first part, first half, slot 0. (Address: 0x06000000)
-        MainBgFirstPart = 1 | vramOffset!(0),
+        MainBgFirstPart = 1,
         /// Maps Bank to Main's background second part, first half, slot 0. (Address: 0x06004000)
         MainBgSecondPart = 1 | vramOffset!(1),
         /// Maps Bank to Main's background first part, second half, slot 0. (Address: 0x06010000)
@@ -411,7 +410,7 @@ pub mod vram_g {
         MainBgSecondPartSecondHalf = 1 | vramOffset!(3),
 
         /// Maps Bank to Main sprites first part of slot 0 (Address: 0x06400000)
-        MainSpriteFirstPart = 2 | vramOffset!(0),
+        MainSpriteFirstPart = 2,
         /// Maps Bank to Main sprites second part of slot 0 (Address: 0x06404000)
         MainSpriteSecondPart = 2 | vramOffset!(1),
         /// Maps Bank to Main sprites first part, second half  (Address: 0x06410000)
@@ -420,7 +419,7 @@ pub mod vram_g {
         MainSpriteSecondPartSecondHalf = 2 | vramOffset!(3),
 
         /// Maps Bank to 3D texture palette slot 0
-        TexturePaletteSlot0 = 3 | vramOffset!(0),
+        TexturePaletteSlot0 = 3,
         /// Maps Bank to 3D texture palette slot 1
         TexturePaletteSlot1 = 3 | vramOffset!(1),
         /// Maps Bank to 3D texture palette slot 4
@@ -429,7 +428,7 @@ pub mod vram_g {
         TexturePaletteSlot5 = 3 | vramOffset!(3),
 
         /// Maps Bank to Main background extended palette, slots 0 and 1
-        BgExtPaletteSlot01 = 4 | vramOffset!(0),
+        BgExtPaletteSlot01 = 4,
         /// Maps Bank to Main background extended palette, slots 2 and 3
         BgExtPaletteSlot23 = 4 | vramOffset!(1),
 
@@ -501,6 +500,8 @@ pub mod vram_i {
 }
 
 pub mod colors {
+    #![allow(clippy::unusual_byte_groupings)]
+
     use super::Color;
 
     pub static BLACK: Color = Color(0b0_00000_00000_00000);

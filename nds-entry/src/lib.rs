@@ -2,7 +2,22 @@ use proc_macro::TokenStream;
 use quote::{__private::ext::RepToTokensExt, quote};
 use syn::{parse_macro_input, ItemFn};
 
-/// ROM entry point
+/// Use it to mark the ROM entry point.
+///
+/// Example:
+/// ```rust,no_run
+/// #![no_main]
+///
+/// #[macro_use]
+/// extern crate nds:
+///
+/// #[entry]
+/// fn main() -> ! {
+///     loop {
+///         nds::interrupts::swi_wait_for_v_blank();
+///     }
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn entry(_: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemFn);
@@ -26,7 +41,7 @@ pub fn entry(_: TokenStream, input: TokenStream) -> TokenStream {
             pub extern "C" fn main() -> ! {
                 #input
                 let ret = #name();
-                panic!("main() returned {:?}\0",ret);
+                panic!("main() returned {:?}",ret);
             }
         }
     } else {
