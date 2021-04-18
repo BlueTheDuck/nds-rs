@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 nds-sys = { path = "nds-sys" }
 nds-entry = { path = "nds-entry" }
+bitflags = "*"
 
 [workspace]
-members = [ "nds-sys", "nds-entry" ]
+members = [ "nds-sys", "nds-entry", "libc" ]

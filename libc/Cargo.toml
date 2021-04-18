@@ -1,13 +1,9 @@
 [package]
-name = "nds-sys"
+name = "libc"
 version = "0.1.0"
 authors = ["BlueTheDuck <no-reply@perezv.ar>"]
 edition = "2018"
-build = "build.rs"
-links = "nds"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bitflags = "1.2"
-libc = { path = "../libc" }

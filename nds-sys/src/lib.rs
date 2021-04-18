@@ -14,3 +14,4 @@ pub mod input;
 pub mod interrupts;
 pub mod system;
 pub mod video;
+pub mod bindings;
