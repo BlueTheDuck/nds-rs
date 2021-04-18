@@ -1,6 +1,7 @@
 #![no_std]
 #![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
+#![feature(asm)]
 
 pub use nds_entry::entry;
 pub use nds_sys as sys;
@@ -21,6 +22,8 @@ pub mod video;
 pub mod debug {
     extern "C" {
         fn nocashMessage(msg: *const u8);
+        fn consoleDemoInit();
+        pub fn printf(msg: *const u8);
     }
     pub fn no_cash_message(msg: &str) {
         let mut msg_str: [u8; 256] = unsafe { core::mem::zeroed() };
@@ -30,7 +33,11 @@ pub mod debug {
         // SAFETY: msg_str was originally filled with 256 0's, but we copied up to 255 bytes from msg to it. So at least the last byte is still 0
         unsafe {
             nocashMessage(msg_str.as_ptr());
+            printf(msg.as_ptr());
         };
+    }
+    pub unsafe fn console_demo_init() {
+        consoleDemoInit();
     }
 }
 
@@ -87,15 +94,22 @@ pub fn handle_alloc_error(_: Layout) -> ! {
 
 #[panic_handler]
 pub fn panic(info: &core::panic::PanicInfo) -> ! {
-    crate::debug::no_cash_message("Panic! At the DS\0");
+    crate::debug::no_cash_message("Panic! At the DS\n\0");
     if let Some(arg) = info.message() {
         let mut out = String::with_capacity(256);
         if write!(&mut out, "{}", arg).is_ok() {
             crate::debug::no_cash_message(out.as_str());
+            unsafe {
+                crate::debug::printf(out.as_ptr());
+            }
         } else {
+            static extra_err_msg: &str = "Additionally, errors ocurred while trying to format the error message";
             crate::debug::no_cash_message(
-                "Additionally, errors ocurred while trying to format the error message",
+                extra_err_msg
             );
+            unsafe {
+                crate::debug::printf(extra_err_msg.as_ptr());
+            }
         }
     }
     loop {
