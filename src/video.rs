@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use nds_sys::video::Flags;
+
 /// Width of the screens, in pixels
 pub static WIDTH: usize = 256;
 /// Height of the screens, in pixels
@@ -12,17 +14,6 @@ pub mod registers {
     pub use nds_sys::video::{VRAM_A, VRAM_B, VRAM_C, VRAM_D};
 }
 
-const MODE_ENABLE_3D: u32 = 1 << 3;
-
-/// Used to select what backgrounds to draw
-#[repr(u32)]
-enum DisplayBg {
-    Bg0 = bit!(8),
-    Bg1 = bit!(9),
-    Bg2 = bit!(10),
-    Bg3 = bit!(11),
-}
-
 /// Constants to be used for [`set_mode`] and [`set_mode_sub`].
 /// The DS has 2 rendering engines, Main and Sub, that can be put in different modes (6 modes and 5 modes respectively).
 /// Mode6_2d and the ones suffixed "3D" are only valid for Main
@@ -30,32 +21,32 @@ enum DisplayBg {
 /// Modes FB0-FB3 ("LCD" mode) map the Banks A-D respectively to pixels on screen.
 #[repr(u32)]
 pub enum Mode {
-    Mode0_2d = 0x10000,
-    Mode1_2d = 0x10001,
-    Mode2_2d = 0x10002,
-    Mode3_2d = 0x10003,
-    Mode4_2d = 0x10004,
-    Mode5_2d = 0x10005,
-    Mode6_2d = 0x10006,
+    Mode0_2d = Flags::DISPLAY_ON.bits() | Flags::MODE0.bits(),
+    Mode1_2d = Flags::DISPLAY_ON.bits() | Flags::MODE1.bits(),
+    Mode2_2d = Flags::DISPLAY_ON.bits() | Flags::MODE2.bits(),
+    Mode3_2d = Flags::DISPLAY_ON.bits() | Flags::MODE3.bits(),
+    Mode4_2d = Flags::DISPLAY_ON.bits() | Flags::MODE4.bits(),
+    Mode5_2d = Flags::DISPLAY_ON.bits() | Flags::MODE5.bits(),
+    Mode6_2d = Flags::DISPLAY_ON.bits() | Flags::MODE6.bits(),
 
-    Mode0_3d = (Self::Mode0_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
-    Mode1_3d = (Self::Mode1_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
-    Mode2_3d = (Self::Mode2_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
-    Mode3_3d = (Self::Mode3_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
-    Mode4_3d = (Self::Mode4_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
-    Mode5_3d = (Self::Mode5_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
-    Mode6_3d = (Self::Mode6_2d as u32 | DisplayBg::Bg0 as u32 | MODE_ENABLE_3D),
+    Mode0_3d = Self::Mode0_2d as u32 | Flags::BG0.bits() | Flags::ENABLE_3D.bits(),
+    Mode1_3d = Self::Mode1_2d as u32 | Flags::BG0.bits() | Flags::ENABLE_3D.bits(),
+    Mode2_3d = Self::Mode2_2d as u32 | Flags::BG0.bits() | Flags::ENABLE_3D.bits(),
+    Mode3_3d = Self::Mode3_2d as u32 | Flags::BG0.bits() | Flags::ENABLE_3D.bits(),
+    Mode4_3d = Self::Mode4_2d as u32 | Flags::BG0.bits() | Flags::ENABLE_3D.bits(),
+    Mode5_3d = Self::Mode5_2d as u32 | Flags::BG0.bits() | Flags::ENABLE_3D.bits(),
+    Mode6_3d = Self::Mode6_2d as u32 | Flags::BG0.bits() | Flags::ENABLE_3D.bits(),
 
     /// Display directly from RAM
-    ModeFifo = (3 << 16),
+    ModeFifo = Flags::DISPLAY_RAM.bits(),
     /// Displays directly from Bank A in LCD mode
-    ModeFb0 = 0x00020000,
+    ModeFb0 = Flags::DISPLAY_VRAM.bits() | Flags::VRAM_A.bits(),
     /// Displays directly from Bank B in LCD mode
-    ModeFb1 = 0x00060000,
+    ModeFb1 = Flags::DISPLAY_VRAM.bits() | Flags::VRAM_B.bits(),
     /// Displays directly from Bank C in LCD mode
-    ModeFb2 = 0x000A0000,
+    ModeFb2 = Flags::DISPLAY_VRAM.bits() | Flags::VRAM_C.bits(),
     /// Displays directly from Bank D in LCD mode
-    ModeFb3 = 0x000E0000,
+    ModeFb3 = Flags::DISPLAY_VRAM.bits() | Flags::VRAM_D.bits(),
 }
 
 /// Sets video mode for Main

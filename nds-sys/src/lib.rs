@@ -9,6 +9,7 @@ macro_rules! bit {
     };
 }
 
+pub mod background;
 pub mod dma;
 pub mod input;
 pub mod interrupts;

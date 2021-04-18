@@ -11,12 +11,7 @@ use alloc::string::String;
 use core::alloc::{GlobalAlloc, Layout};
 use core::fmt::Write;
 
-macro_rules! bit {
-    ($shift: literal) => {
-        (1 << $shift)
-    };
-}
-
+pub mod background;
 pub mod dma;
 pub mod input;
 pub mod interrupts;

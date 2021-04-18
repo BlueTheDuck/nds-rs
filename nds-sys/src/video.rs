@@ -1,6 +1,8 @@
 //! Video related functions and constants.
 //! Mostly "borrowed" from libnds's video.h
 
+pub const BG_GFX: *mut u16 = 0x06000000 as *mut u16;
+
 /// Display control register (main). Used to choose the mode for the Main Engine
 pub static mut REG_DISPCNT: *mut u32 = 0x04000000 as *mut u32;
 /// Display control register (sub). Used to choose the mode for the Sub Engine
@@ -40,3 +42,56 @@ pub static mut VRAM_D: *mut u16 = 0x6860000 as *mut u16;
 pub static mut BG_PALETTE: *mut u16 = 0x05000000 as *mut u16;
 /// Background palette (Sub)
 pub static mut BG_PALETTE_SUB: *mut u16 = 0x05000400 as *mut u16;
+
+bitflags! {
+    pub struct Flags: u32 {
+        /// Use extended palette
+        const EXT_PALETTE = bit!(30);
+        /// These bits multiplied by 0x100000 gives the base offset for the background data
+        const BG_SCREEN_BASE_MASK = 3 << 27;
+        // These are mutually exclusive
+        /// When [DISPLAY_VRAM] is set, display from this bank
+        const VRAM_D = 3 << 18;
+        /// When [DISPLAY_VRAM] is set, display from this bank
+        const VRAM_C = 2 << 18;
+        /// When [DISPLAY_VRAM] is set, display from this bank
+        const VRAM_B = 1 << 18;
+        /// When [DISPLAY_VRAM] is set, display from this bank
+        const VRAM_A = 0 << 18;
+        //
+        // These are mutually exclusive
+        const DISPLAY_RAM = 3 << 16;
+        const DISPLAY_VRAM = 2 << 16;
+        const DISPLAY_GRAPHICS = 1 << 16;
+        const DISPLAY_ON = bit!(16);
+        const DISPLAY_OFF = 0;
+        //
+        // Set to show objects
+        const OBJ_DISPLAY = bit!(12);
+        /// Set to show this background
+        const BG3 = bit!(11);
+        /// Set to show this background
+        const BG2 = bit!(10);
+        /// Set to show this background
+        const BG1 = bit!(9);
+        /// Set to show this background
+        const BG0 = bit!(8);
+        /// Set to use BG0 as the output of the 3D engine
+        const ENABLE_3D = bit!(3);
+        // These are mutually exclusive
+        /// Sets engine in mode 6 (invalid for Sub)
+        const MODE6 = 6;
+        /// Sets engine in mode 5
+        const MODE5 = 5;
+        /// Sets engine in mode 4
+        const MODE4 = 4;
+        /// Sets engine in mode 3
+        const MODE3 = 3;
+        /// Sets engine in mode 2
+        const MODE2 = 2;
+        /// Sets engine in mode 1
+        const MODE1 = 1;
+        /// Sets engine in mode 0
+        const MODE0 = 0;
+    }
+}
