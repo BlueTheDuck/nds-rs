@@ -2,6 +2,7 @@
 //! Mostly "borrowed" from libnds's video.h
 
 pub const BG_GFX: *mut u16 = 0x06000000 as *mut u16;
+pub const BG_GFX_SUB: *mut u16 = 0x06200000 as *mut u16;
 
 /// Display control register (main). Used to choose the mode for the Main Engine
 pub static mut REG_DISPCNT: *mut u32 = 0x04000000 as *mut u32;
