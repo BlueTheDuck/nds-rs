@@ -14,13 +14,13 @@ use core::alloc::{GlobalAlloc, Layout};
 use core::fmt::Write;
 
 pub mod background;
+#[macro_use]
+pub mod debug;
 pub mod dma;
 pub mod input;
 pub mod interrupts;
 pub mod system;
 pub mod video;
-
-pub mod debug;
 
 type CPtr = *mut core::ffi::c_void;
 extern "C" {
@@ -67,7 +67,9 @@ unsafe impl GlobalAlloc for MallocAlloc {
 
 #[alloc_error_handler]
 pub fn handle_alloc_error(_: Layout) -> ! {
-    crate::debug::no_cash_message("Allocation failed!");
+    unsafe {
+        debug::NOCASH.print_with_params_no_alloc("Out of memory\0");
+    }
     loop {
         crate::interrupts::swi_wait_for_v_blank();
     }
@@ -75,23 +77,15 @@ pub fn handle_alloc_error(_: Layout) -> ! {
 
 #[panic_handler]
 pub fn panic(info: &core::panic::PanicInfo) -> ! {
-    crate::debug::no_cash_message("Panic! At the DS\n\0");
+    println!("Panic! At the DS");
+    unsafe {
+        debug::NOCASH.print_with_params_no_alloc("r0: %r0%\0");
+        debug::NOCASH.print_with_params_no_alloc("sp: %sp%\0");
+        debug::NOCASH.print_with_params_no_alloc("lr: %lr%\0");
+        debug::NOCASH.print_with_params_no_alloc("pc: %pc%\0");
+    }
     if let Some(arg) = info.message() {
-        let mut out = String::with_capacity(256);
-        if write!(&mut out, "{}", arg).is_ok() {
-            crate::debug::no_cash_message(out.as_str());
-            unsafe {
-                crate::debug::printf(out.as_ptr());
-            }
-        } else {
-            static extra_err_msg: &str = "Additionally, errors ocurred while trying to format the error message";
-            crate::debug::no_cash_message(
-                extra_err_msg
-            );
-            unsafe {
-                crate::debug::printf(extra_err_msg.as_ptr());
-            }
-        }
+        println!("{}", arg);
     }
     loop {
         crate::interrupts::swi_wait_for_v_blank();
