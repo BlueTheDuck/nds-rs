@@ -1,4 +1,7 @@
-use crate::{bindings::{bgControl, bgInitSub_call, bgInit_call}, video::{BG_GFX, BG_GFX_SUB}};
+use crate::{
+    bindings::{bgControl, bgInitSub_call, bgInit_call},
+    video::{BG_GFX, BG_GFX_SUB},
+};
 
 pub mod registers {
     /// Control register for background 0 of Main Engine
@@ -17,12 +20,12 @@ pub mod registers {
     pub const DB_BG2CNT: *mut u16 = 0 as _;
     /// Control register for background 3 of Sub Engine
     pub const DB_BG3CNT: *mut u16 = 0 as _;
-    
+
     /// Affine transformation only. Register for background 2 of Main Engine. Controls x0 (Displacement)
     pub const BG2X: *mut u32 = 0x04000028 as _;
     /// Affine transformation only. Register for background 2 of Main Engine. Controls y0 (Displacement)
     pub const BG2Y: *mut u32 = 0x0400002C as _;
-    
+
     pub const BG3PA: *mut i16 = 0x04000030 as _;
     pub const BG3PB: *mut i16 = 0x04000032 as _;
     pub const BG3PC: *mut i16 = 0x04000034 as _;
@@ -62,6 +65,7 @@ bitflags! {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 pub enum BgType {
     /// 8 bit per pixel tiled background with 16 bit tile indexes. No rotation nor scaling
@@ -76,6 +80,19 @@ pub enum BgType {
     Bmp8 = 4,
     /// Bitmap background with 16 bit ABGR1555 colors
     Bmp16 = 5,
+}
+impl<N: Into<usize>> From<N> for BgType {
+    fn from(ty: N) -> Self {
+        match ty.into() {
+            0 => Self::Text8,
+            1 => Self::Text4,
+            2 => Self::Rotation,
+            3 => Self::ExRotation,
+            4 => Self::Bmp8,
+            5 => Self::Bmp16,
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[repr(C)]
@@ -148,16 +165,12 @@ pub unsafe fn bg_get_map_base(id: usize) -> usize {
     return (cnt & 0xFF) as usize;
 }
 
-pub unsafe fn bg_tile_ram(base: usize) -> *mut u16 {
-    BG_GFX.add(base * 0x4000) as *mut u16
-}
-
 pub unsafe fn bg_get_gfx_ptr(id: usize) -> *mut u16 {
     use super::bindings::bgState;
     match bgState[id].type_ {
-        1 | 2 | 3 => {
+        0 | 1 | 2 | 3 => {
             if id < 4 {
-                bg_tile_ram(bg_get_tile_base(id))
+                BG_GFX.add(bg_get_tile_base(id) * 0x4000) as *mut u16
             } else {
                 //((u16*)BG_TILE_RAM_SUB(bgGetTileBase(id)))
                 unimplemented!("Graphics for SUB are not yet implemented")
