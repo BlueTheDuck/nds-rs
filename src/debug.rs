@@ -90,9 +90,11 @@ impl NoCash {
     /// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
     #[inline]
     pub fn print_with_params<S: Debug>(&mut self, s: S) {
-        let s = alloc::format!("{:?}\0", s);
-        unsafe {
-            registers::STRING_OUT_PARAM_LF.write_volatile(s.as_ptr());
+        if self.is_enabled() {
+            let s = alloc::format!("{:?}\0", s);
+            unsafe {
+                registers::STRING_OUT_PARAM_LF.write_volatile(s.as_ptr());
+            }
         }
     }
 
