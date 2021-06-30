@@ -16,14 +16,27 @@ macro_rules! print {
 }
 #[macro_export]
 macro_rules! println {
-    () => (print!("\n"));
+    () => (print!('\n'));
     ($($arg:tt)*) => ({
         print!("{}\n", format_args!($($arg)*))
-    })
+    });
 }
 
-/// Used to access all NO$GBA debugging tools. 
-/// By default, they are disabled, call [`NoCash::find_debugger`]
+/// Writes a string byte-by-byte to the NO$GBA TTY.
+/// This function won't allocate, so the caller has to take care to
+/// null-terminate their strings. Still, this function has 2 paths:
+/// If the string _is null-terminated_, it will be passed directly to NO$GBA,
+/// allowing for %param%s and faster code execution.
+/// Otherwise, is will be copied byte-by-byte to the [`Char Out`](registers::CHAR_OUT)
+#[inline]
+pub fn _print(args: core::fmt::Arguments) {
+    unsafe {
+        write!(NOCASH, "{}\0", args).unwrap();
+    }
+}
+
+/// Used to access all NO$GBA debugging tools.
+/// By default they are disabled, call [`NoCash::find_debugger`]
 /// to try to enable them.
 pub static mut NOCASH: NoCash = NoCash { found: false };
 
@@ -33,8 +46,8 @@ pub static mut NOCASH: NoCash = NoCash { found: false };
 /// and when [`NoCash::found`] is `false`, they return immediatly
 pub struct NoCash {
     /// Are we running on NO$GBA?
-    /// If `false`, then these functions won't do anything. 
-    found: bool
+    /// If `false`, then these functions won't do anything.
+    found: bool,
 }
 impl NoCash {
     /// The static instance [`NOCASH`] is disabled by default,
@@ -61,8 +74,7 @@ impl NoCash {
     /// - lastclks: show number of cycles since previous lastclks (or zeroclks)
     /// - zeroclks: resets the 'lastclks' counter
     ///
-    /// Since allocs are forbidden in this fn, the caller must ensure that `s` is
-    /// null-terminated and less than 256 bytes.
+    /// The caller must make sure the string is null-terminated
     ///
     /// Doesn't do anything unless [NoCash::is_enabled()] returns true
     ///
@@ -90,6 +102,8 @@ impl NoCash {
     /// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
     #[inline]
     pub fn print_with_params<S: Debug>(&mut self, s: S) {
+        // TODO: Change signature to something that makes more sense
+        // and remove the \0
         if self.is_enabled() {
             let s = alloc::format!("{:?}\0", s);
             unsafe {
@@ -109,13 +123,20 @@ impl NoCash {
             None
         }
     }
-
 }
 impl Write for NoCash {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        for c in s.chars() {
-            unsafe {
-                registers::CHAR_OUT.write_volatile(c);
+        // NO$GBA uses C-style strings, so we can only pass null-terminated strings.
+        // Since we promised to *not* allocate, we can only use this register
+        // **if, and only if,** the string we received is already null-terminated...
+        if s.ends_with('\0') {
+            unsafe { registers::STRING_OUT_PARAM.write_volatile(s.as_ptr()) }
+        } else {
+            // ...otherwise we have to print it char by char
+            for c in s.chars() {
+                unsafe {
+                    registers::CHAR_OUT.write_volatile(c);
+                }
             }
         }
         Ok(())
@@ -129,33 +150,37 @@ impl Write for NoCash {
     }
 }
 
-/// Writes a string byte-by-byte to the NO$GBA TTY.
-/// While it doesn't allocate, it also doesn't allow
-/// NO$GBA %params%. Use [`NoCash::print_with_params`] and [`NoCash::print_with_params_no_alloc`]
-#[inline]
-pub fn _print(args: core::fmt::Arguments) {
-    unsafe {
-        NOCASH.write_fmt(args);
-    }
-}
-
-/// On debug builds this function sets a breakpoint.
+/// On debug builds this function sets a NO$GBA style* breakpoint.
 /// You should prefer the macro [`dbg_breakpoint!`], since it provides
-/// debug info (and actually calls this function)
-/// (This only works on NO$GBA. Other emulators may support it)
+/// debug info (and actually just calls this function)
+///
+/// * `mov r11,r11`, read more on [gbatek]
+///
+/// [gbatek]: http://problemkaputt.de/gbatek.htm#breakpoints
 #[inline(always)]
+#[cfg(debug_assertions)]
 pub fn breakpoint() {
-    if cfg!(debug_assertions) {
-        unsafe {
-            asm!("mov r11,r11");
-        }
+    /*
+     * `objdump -D` may output something like:
+     * `e1a0b00b mov fp,fp`
+     * `e1a0b00b mov r11,r11`
+     */
+    unsafe {
+        asm!("mov r11,r11");
     }
 }
+#[inline(always)]
+#[cfg(not(debug_assertions))]
+pub const fn breakpoint() {}
 
-/// Sets a breakpoint on debug builds.
+/// Sets a NO$GBA style* breakpoint on debug builds.
 /// Before the breakpoint is hit, the filename and line number
 /// are print to the debugger console, along with an optional
 /// formatted message (akin to [`println!`])
+///
+/// * `mov r11,r11`, read more on [gbatek]
+///
+/// [gbatek]: http://problemkaputt.de/gbatek.htm#breakpoints
 #[macro_export]
 macro_rules! dbg_breakpoint {
     () => {
