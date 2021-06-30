@@ -10,6 +10,7 @@ edition = "2018"
 nds-sys = { path = "nds-sys" }
 nds-entry = { path = "nds-entry" }
 bitflags = "*"
+paste = "*"
 
 [workspace]
 members = [ "nds-sys", "nds-entry", "libc" ]
