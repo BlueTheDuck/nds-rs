@@ -3,15 +3,14 @@
 #![feature(alloc_error_handler)]
 #![feature(asm)]
 #![feature(const_generics)]
+#![allow(unused_parens)]
 
 pub use nds_entry::entry;
 pub use nds_sys as sys;
 
 extern crate alloc;
 
-use alloc::string::String;
 use core::alloc::{GlobalAlloc, Layout};
-use core::fmt::Write;
 
 pub mod background;
 #[macro_use]
@@ -32,6 +31,7 @@ extern "C" {
 
 #[global_allocator]
 static ALLOC: MallocAlloc = MallocAlloc;
+
 struct MallocAlloc;
 unsafe impl GlobalAlloc for MallocAlloc {
     unsafe fn alloc(&self, layout: core::alloc::Layout) -> *mut u8 {
