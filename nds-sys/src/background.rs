@@ -9,17 +9,17 @@ pub mod registers {
     /// Control register for background 1 of Main Engine
     pub const BG1CNT: *mut u16 = 0x0400000A as _;
     /// Control register for background 2 of Main Engine
-    pub const BG2CNT: *mut u16 = 0 as _;
+    pub const BG2CNT: *mut u16 = 0x0400000C as _;
     /// Control register for background 3 of Main Engine
-    pub const BG3CNT: *mut u16 = 0 as _;
+    pub const BG3CNT: *mut u16 = 0x0400000E as _;
     /// Control register for background 0 of Sub Engine
-    pub const DB_BG0CNT: *mut u16 = 0 as _;
+    pub const DB_BG0CNT: *mut u16 = 0x04001008 as _;
     /// Control register for background 1 of Sub Engine
-    pub const DB_BG1CNT: *mut u16 = 0 as _;
+    pub const DB_BG1CNT: *mut u16 = 0x0400100A as _;
     /// Control register for background 2 of Sub Engine
-    pub const DB_BG2CNT: *mut u16 = 0 as _;
+    pub const DB_BG2CNT: *mut u16 = 0x0400100C as _;
     /// Control register for background 3 of Sub Engine
-    pub const DB_BG3CNT: *mut u16 = 0 as _;
+    pub const DB_BG3CNT: *mut u16 = 0x0400100E as _;
 
     /// Affine transformation only. Register for background 2 of Main Engine. Controls x0 (Displacement)
     pub const BG2X: *mut u32 = 0x04000028 as _;
@@ -45,6 +45,7 @@ pub mod registers {
     pub const DB_BG3Y: *mut u32 = 0x0400103C as _;
 }
 
+// TODO: SCREENSIZE_* are wrongly named, not every type of BG interprets these bits the same
 bitflags! {
     pub struct Flags: u16 {
         const SCREENSIZE_512_512 = 3 << 14;
