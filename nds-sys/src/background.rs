@@ -52,8 +52,6 @@ bitflags! {
         const SCREENSIZE_512_256 = 1 << 14;
         const SCREENSIZE_256_256 = 0 << 14;
         const ALTERNATIVE_EXT_PALETTE = bit!(13);
-        /// These bits multiplied by 0x800 and added [BG_SCREEN_BASE_MASK](super::video::Flags::BG_SCREEN_BASE_MASK) give the address where screen info is stored for this layer
-        const SCREEN_OFFSET_MASK = 0b11111 << 8;
         /// Set to use 256-color mode, unset for 16-color mode
         const FULLCOLOR = bit!(7);
         /// Set to enable mosaic processing. See [DB_MOSAIC]
@@ -64,6 +62,11 @@ bitflags! {
         const HIGHEST_PRIORITY = 0;
     }
 }
+
+/// These bits multiplied by 0x800 and added [BG_SCREEN_BASE_MASK](super::video::Flags::BG_SCREEN_BASE_MASK) give the address where screen info is stored for this layer
+pub const SCREEN_OFFSET_MASK: u16 = 0b11111 << 8;
+pub const SCREEN_BASE_OFFSET: u16 = 8;
+pub const CHARACTER_BASE_OFFSET: u16 = 2;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
@@ -220,9 +223,9 @@ pub unsafe fn bg_init_sub(
     tile_base: usize,
 ) -> usize {
     bgInitSub_call(
-        layer as usize as i32,
-        bg_type as usize as u32,
-        bg_size as usize as u32,
+        layer as i32,
+        bg_type as u32,
+        bg_size as u32,
         map_base as i32,
         tile_base as i32,
     ) as usize
