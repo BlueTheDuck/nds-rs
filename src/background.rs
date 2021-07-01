@@ -1,13 +1,8 @@
-use core::{
-    cell::{RefCell, UnsafeCell},
-    convert::TryFrom,
-};
-
 pub use background::{BgSize, BgType, Layer};
 use nds_sys::{
-    background::{self, bg_get_gfx_ptr, bg_get_map_base, bg_init, bg_init_sub},
+    background::{self, bg_get_gfx_ptr, bg_get_map_base, bg_get_tile_base, bg_init, bg_init_sub},
     bindings::bgState,
-    video::BG_GFX,
+    video::{BG_GFX, BG_GFX_SUB},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -23,7 +18,7 @@ pub enum BackgroundId {
     SubBg3 = 7,
 }
 impl BackgroundId {
-    pub fn is_main(&self) -> bool {
+    pub const fn is_main(&self) -> bool {
         match self {
             Self::MainBg0 | Self::MainBg1 | Self::MainBg2 | Self::MainBg3 => true,
             _ => false,
@@ -54,57 +49,34 @@ impl From<usize> for BackgroundId {
     }
 }
 
-/* pub fn graphics_ptr(id: BackgroundId) -> *mut u16 {
-    match unsafe {bgState[id as usize].type_} {
-        1 | 2 | 3 => {
-            if id.is_main() {
-                bg_tile_ram(bg_get_tile_base(id))
-            } else {
-                //((u16*)BG_TILE_RAM_SUB(bgGetTileBase(id)))
-                unimplemented!("Graphics for SUB are not yet implemented")
-            }
-        }
-        4 | 5 => {
-            if id.is_main() {
-                BG_GFX.add(0x2000 * bg_get_map_base(id))
-            } else {
-                BG_GFX_SUB.add(0x2000 * bg_get_map_base(id))
-            }
-        }
-        _ => {
-            unreachable!("Background type is not any of: enum BgType {Text8, Text4, Rotation, ExRotation, Bmp8, Bmp16}");
-        }
-    }
-} */
-/*
-
-
-
-            background::BgType::Bmp8,
-            background::BgSize::BgSize_B8_256x256,
-*/
-pub struct Background<const id: BackgroundId>;
-impl<const id: BackgroundId> Background<id> {
+pub struct Background<const ID: BackgroundId>;
+impl<const ID: BackgroundId> Background<ID> {
     pub fn graphics_ptr(&self) -> *mut u16 {
-        let bg_type: BgType = unsafe { bgState[id as usize].type_ as usize }.into();
+        let bg_type: BgType = unsafe { bgState[ID as usize].type_ as usize }.into();
         match bg_type {
             BgType::Text8 | BgType::Text4 | BgType::Rotation | BgType::ExRotation => {
-                todo!()
+                if ID.is_main() {
+                    unsafe { BG_GFX.add(0x4000 * bg_get_tile_base(ID as usize)) }
+                } else {
+                    unsafe { BG_GFX_SUB.add(0x4000 * bg_get_tile_base(ID as usize)) }
+                }
             }
             BgType::Bmp8 | BgType::Bmp16 => {
-                if id.is_main() {
-                    unsafe { BG_GFX.add(0x2000 * bg_get_map_base(id as usize)) }
+                if ID.is_main() {
+                    unsafe { BG_GFX.add(0x2000 * bg_get_map_base(ID as usize)) }
                 } else {
-                    todo!()
+                    unsafe { BG_GFX_SUB.add(0x2000 * bg_get_map_base(ID as usize)) }
                 }
             }
         }
     }
     pub fn init(&self, type_: BgType, size: BgSize) -> BackgroundId {
-        if id.is_main() {
-            unsafe { bg_init(id.get_layer(), type_, size, 0, 0).into() }
+        // TODO: Check if 3D is being used
+        
+        if ID.is_main() {
+            unsafe { bg_init(ID.get_layer(), type_, size, 0, 0).into() }
         } else {
-            unsafe { bg_init_sub(id.get_layer(), type_, size, 0, 0).into() }
+            unsafe { bg_init_sub(ID.get_layer(), type_, size, 0, 0).into() }
         }
     }
 }

@@ -1,5 +1,6 @@
 pub mod engines;
 pub mod banks;
+pub mod api;
 
 pub mod colors {
     #![allow(clippy::unusual_byte_groupings)]
