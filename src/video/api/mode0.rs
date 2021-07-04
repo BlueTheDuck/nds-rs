@@ -1,5 +1,11 @@
+use core::mem::size_of;
+
 use crate::sys::background as bg;
 use crate::sys::video;
+
+use super::Engine;
+use super::TextBGMap;
+use super::TextBg;
 
 pub fn create_main_mode0(
     map_base: u8,
@@ -14,20 +20,6 @@ pub fn create_main_mode0(
     Engine::new(map_base, tiles_base)
 }
  */
-pub struct Engine<L1, L2, L3, L4, const MAIN: bool> {
-    layer0: L1,
-    layer1: L2,
-    layer2: L3,
-    layer3: L4,
-    display0: bool,
-    display1: bool,
-    display2: bool,
-    display3: bool,
-    /// Actually a "`u3`", also called "Screen"
-    map_base: u8,
-    /// Actually a "`u3`", also called "Character"
-    tiles_base: u8,
-}
 
 /* #region Mode 0 */
 impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
@@ -71,10 +63,10 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
             flags |= video::Flags::BG3;
         }
 
-        let screen_base = (self.map_base as u32) << video::SCREEN_BASE_OFFSET;
-        let character_base = (self.tiles_base as u32) << video::CHARACTER_BASE_OFFSET;
+        let map_base = (self.map_base as u32) << video::MAP_BASE_OFFSET;
+        let tiles_base = (self.tiles_base as u32) << video::TILES_BASE_OFFSET;
 
-        flags.bits() | screen_base | character_base
+        flags.bits() | map_base | tiles_base
     }
 
     pub unsafe fn commit(&self) {
@@ -110,7 +102,7 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
     }
 
     // Screen/map ptr
-    pub fn get_map_ptr(&self, bg: u8) -> *mut u16 {
+    pub fn get_map_ptr(&self, bg: u8) -> &mut [TextBGMap] {
         let map_base_block = {
             let map_base = match bg {
                 0 => self.layer0.map_base,
@@ -121,13 +113,26 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
             } as usize;
             map_base * 0x800 / 2
         };
+        let map_size = match bg {
+            0 => self.layer0.get_map_size(),
+            1 => self.layer1.get_map_size(),
+            2 => self.layer2.get_map_size(),
+            3 => self.layer3.get_map_size(),
+            _ => unreachable!(),
+        };
+        let ptr;
         unsafe {
             if MAIN {
-                return video::BG_GFX
-                    .add(self.map_base as usize * 0x10000 / 2 + map_base_block);
+                ptr = video::BG_GFX.add(self.map_base as usize * 0x10000 / 2 + map_base_block);
             } else {
-                return video::BG_GFX_SUB.add(map_base_block);
+                ptr = video::BG_GFX_SUB.add(map_base_block);
             }
+        }
+        unsafe {
+            core::slice::from_raw_parts_mut(
+                ptr as *mut TextBGMap,
+                map_size / size_of::<TextBGMap>(),
+            )
         }
     }
 
@@ -162,7 +167,8 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
             _ => unreachable!(),
         };
     }
-
+    /// `map_offset` must be less than 32
+    /// `tiles_offset` must be less than 16
     pub fn set_bg_offsets(&mut self, bg: u8, map_offset: u8, tiles_offset: u8) {
         debug_assert!(map_offset <= 0b11111, "screen_base must be a valid u5");
         match bg {
@@ -172,10 +178,7 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
             3 => self.layer3.map_base = map_offset,
             _ => unreachable!(),
         };
-        debug_assert!(
-            tiles_offset <= 0b1111,
-            "character_base must be a valid u4"
-        );
+        debug_assert!(tiles_offset <= 0b1111, "character_base must be a valid u4");
         match bg {
             0 => self.layer0.tiles_base = tiles_offset,
             1 => self.layer1.tiles_base = tiles_offset,
@@ -186,57 +189,4 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
     }
 }
 
-/* #endregion */
-/* #region Text BG */
-enum TextScreenSize {
-    /// 256x256
-    Small,
-    /// 512x256
-    Horizonal,
-    /// 256x512
-    Vertical,
-    /// 512x512
-    Big,
-}
-impl From<&TextScreenSize> for bg::Flags {
-    fn from(v: &TextScreenSize) -> Self {
-        match v {
-            TextScreenSize::Small => bg::Flags::SCREENSIZE_256_256,
-            TextScreenSize::Horizonal => bg::Flags::SCREENSIZE_512_256,
-            TextScreenSize::Vertical => bg::Flags::SCREENSIZE_256_512,
-            TextScreenSize::Big => bg::Flags::SCREENSIZE_512_512,
-        }
-    }
-}
-
-pub struct TextBg {
-    screen_size: TextScreenSize,
-    /// Actually a "`u5`", also called "Map"
-    map_base: u8,
-    /// Actually a "`u4`", also called "Tiles"
-    tiles_base: u8,
-}
-
-impl TextBg {
-    pub fn as_bitflags(&self) -> u16 {
-        let mut flags: bg::Flags = (&self.screen_size).into();
-        flags |= bg::Flags::FULLCOLOR;
-        // TODO: The rest of flags
-
-        let screen_base = (self.map_base as u16) << bg::SCREEN_BASE_OFFSET;
-        let character_base = (self.tiles_base as u16) << bg::CHARACTER_BASE_OFFSET;
-
-        flags.bits() | screen_base | character_base
-    }
-}
-
-impl Default for TextBg {
-    fn default() -> Self {
-        Self {
-            screen_size: TextScreenSize::Small,
-            map_base: 0,
-            tiles_base: 0,
-        }
-    }
-}
 /* #endregion */
