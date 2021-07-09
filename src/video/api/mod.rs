@@ -89,8 +89,8 @@ const TILE_ID_MASK: u16 = 0b11_11111111;
 
 #[repr(transparent)]
 #[derive(Clone, Copy)]
-pub struct TextBGMap(u16);
-impl TextBGMap {
+pub struct TextBGMapData(u16);
+impl TextBGMapData {
     pub fn get_palette_idx(&self) -> u8 {
         let pal = self.0 >> 12;
         return (pal & 0b1111) as u8;
@@ -115,6 +115,12 @@ impl TextBGMap {
             self.0 |= 0b00000100_00000000;
         }
     }
+}
+
+#[derive(Clone, Copy)]
+pub struct SixteenTileData(pub u16);
+impl SixteenTileData {
+
 }
 
 /* #endregion */
