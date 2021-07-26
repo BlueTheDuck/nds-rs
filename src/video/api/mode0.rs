@@ -34,6 +34,7 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
             display1: false,
             display2: false,
             display3: false,
+            display_obj: false,
             map_base,
             tiles_base,
         }
@@ -51,8 +52,8 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
 
         let mut flags = video::Flags::DISPLAY_ON | self.bg_mode();
 
-        if self.display0 {
-            flags |= video::Flags::BG0;
+        if self.display_obj {
+            flags |= video::Flags::OBJECTS;
         }
         if self.display3 {
             flags |= video::Flags::BG3;

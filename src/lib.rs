@@ -26,6 +26,7 @@ pub mod input;
 pub mod interrupts;
 pub mod system;
 pub mod video;
+pub mod sprite;
 
 type CPtr = *mut core::ffi::c_void;
 extern "C" {
