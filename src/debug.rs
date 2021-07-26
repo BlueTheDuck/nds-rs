@@ -1,5 +1,8 @@
 use core::fmt::{Debug, Write};
 
+use lazy_static::lazy_static;
+use spin::Mutex;
+
 pub mod registers {
     // Reads the emulation ID. 16 bytes long
     pub(crate) const EMU_ID_PTR: *const u8 = 0x04FFFA00 as _;
@@ -30,15 +33,26 @@ macro_rules! println {
 /// Otherwise, is will be copied byte-by-byte to the [`Char Out`](registers::CHAR_OUT)
 #[inline]
 pub fn _print(args: core::fmt::Arguments) {
-    unsafe {
+    let mut nocash = NOCASH.lock();
+    write!(nocash, "{}\0", args).unwrap();
+    /* unsafe {
         write!(NOCASH, "{}\0", args).unwrap();
-    }
+    } */
 }
 
+/*
 /// Used to access all NO$GBA debugging tools.
 /// By default they are disabled, call [`NoCash::find_debugger`]
 /// to try to enable them.
-pub static mut NOCASH: NoCash = NoCash { found: false };
+pub static mut NOCASH: NoCash = NoCash { found: false };*/
+//pub static NOCASH: Mutex<NoCash> = Mutex::new(NoCash { found: false });
+lazy_static! {
+    pub static ref NOCASH: Mutex<NoCash> = {
+        let mut nocash = NoCash { found: false };
+        nocash.find_debugger();
+        Mutex::new(nocash)
+    };
+}
 
 /// Symbolizes the emulator NO$GBA and provides
 /// an API for its debugging capabilities.
@@ -54,7 +68,7 @@ impl NoCash {
     /// this will try to find out if we are running in an emulator.
     /// On release, [`NoCash::get_emu_id()`] always returns [`None`], so
     /// all debugging is disabled
-    pub fn find_debugger(&mut self) {
+    fn find_debugger(&mut self) {
         self.found = self.get_emu_id().is_some();
     }
 
@@ -80,9 +94,14 @@ impl NoCash {
     ///
     /// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
     #[inline]
-    pub unsafe fn print_with_params_no_alloc(&mut self, s: &str) {
+    pub fn print_with_params_no_alloc(&mut self, s: &str) {
         if self.is_enabled() {
-            registers::STRING_OUT_PARAM_LF.write_volatile(s.as_ptr());
+            unsafe {
+                // SAFETY: We are writing only a pointer to the NO$GBA TTY,
+                // the string might not be null-terminated (and NO$GBA might print garbage), 
+                // but that is not my problem
+                registers::STRING_OUT_PARAM_LF.write_volatile(s.as_ptr());
+            }
         }
     }
 
