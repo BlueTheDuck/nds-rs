@@ -35,18 +35,12 @@ macro_rules! println {
 pub fn _print(args: core::fmt::Arguments) {
     let mut nocash = NOCASH.lock();
     write!(nocash, "{}\0", args).unwrap();
-    /* unsafe {
-        write!(NOCASH, "{}\0", args).unwrap();
-    } */
 }
 
-/*
-/// Used to access all NO$GBA debugging tools.
-/// By default they are disabled, call [`NoCash::find_debugger`]
-/// to try to enable them.
-pub static mut NOCASH: NoCash = NoCash { found: false };*/
-//pub static NOCASH: Mutex<NoCash> = Mutex::new(NoCash { found: false });
 lazy_static! {
+    /// Used to access all NO$GBA debugging functions.
+    /// The debugger is detected on startup, and if it is found,
+    /// [`NoCash::is_enabled`] will return `true`.
     pub static ref NOCASH: Mutex<NoCash> = {
         let mut nocash = NoCash { found: false };
         nocash.find_debugger();
@@ -57,7 +51,7 @@ lazy_static! {
 /// Symbolizes the emulator NO$GBA and provides
 /// an API for its debugging capabilities.
 /// On release builds these functions don't do anything;
-/// and when [`NoCash::found`] is `false`, they return immediatly
+/// and when [`NoCash::is_enabled`] returns `false`, they return immediatly
 pub struct NoCash {
     /// Are we running on NO$GBA?
     /// If `false`, then these functions won't do anything.
@@ -98,7 +92,7 @@ impl NoCash {
         if self.is_enabled() {
             unsafe {
                 // SAFETY: We are writing only a pointer to the NO$GBA TTY,
-                // the string might not be null-terminated (and NO$GBA might print garbage), 
+                // the string might not be null-terminated (and NO$GBA might print garbage),
                 // but that is not my problem
                 registers::STRING_OUT_PARAM_LF.write_volatile(s.as_ptr());
             }
