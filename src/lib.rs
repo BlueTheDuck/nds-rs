@@ -12,6 +12,12 @@ extern crate alloc;
 
 use core::alloc::{GlobalAlloc, Layout};
 
+macro_rules! bit {
+    ($shift: literal) => {
+        (1 << $shift)
+    };
+}
+
 pub mod background;
 #[macro_use]
 pub mod debug;
