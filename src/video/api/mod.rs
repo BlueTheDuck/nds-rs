@@ -2,14 +2,15 @@ use crate::sys::background as bg;
 use crate::sys::video;
 
 pub struct Engine<L1, L2, L3, L4, const MAIN: bool> {
-    layer0: L1,
-    layer1: L2,
-    layer2: L3,
     layer3: L4,
-    display0: bool,
-    display1: bool,
-    display2: bool,
+    layer2: L3,
+    layer1: L2,
+    layer0: L1,
     display3: bool,
+    display2: bool,
+    display1: bool,
+    display0: bool,
+    pub display_obj: bool,
     /// Actually a "`u3`", also called "Screen"
     map_base: u8,
     /// Actually a "`u3`", also called "Character"

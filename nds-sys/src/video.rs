@@ -65,15 +65,15 @@ bitflags! {
         const DISPLAY_ON = bit!(16);
         const DISPLAY_OFF = 0;
         //
-        // Set to show objects
-        const OBJ_DISPLAY = bit!(12);
-        /// Set to show this background
+        /// Set to show objects
+        const OBJECTS = bit!(12);
+        /// Set to show background 3
         const BG3 = bit!(11);
-        /// Set to show this background
+        /// Set to show background 2
         const BG2 = bit!(10);
-        /// Set to show this background
+        /// Set to show background 1
         const BG1 = bit!(9);
-        /// Set to show this background
+        /// Set to show background 0
         const BG0 = bit!(8);
         /// Set to use BG0 as the output of the 3D engine
         const ENABLE_3D = bit!(3);

@@ -54,14 +54,17 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
         if self.display0 {
             flags |= video::Flags::BG0;
         }
-        if self.display1 {
-            flags |= video::Flags::BG1;
+        if self.display3 {
+            flags |= video::Flags::BG3;
         }
         if self.display2 {
             flags |= video::Flags::BG2;
         }
-        if self.display3 {
-            flags |= video::Flags::BG3;
+        if self.display1 {
+            flags |= video::Flags::BG1;
+        }
+        if self.display0 {
+            flags |= video::Flags::BG0;
         }
 
         let map_base = (self.map_base as u32) << video::MAP_BASE_OFFSET;
@@ -164,6 +167,7 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
             BackgroundId::Bg3 => self.display3 = show,
         };
     }
+
     /// `map_offset` must be less than 32
     /// `tiles_offset` must be less than 16
     pub fn set_bg_offsets(&mut self, bg: BackgroundId, map_offset: u8, tiles_offset: u8) {
