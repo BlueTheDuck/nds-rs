@@ -1,53 +1,60 @@
-use bitflags::bitflags;
+use nds_sys::sprite;
 
-#[repr(C)]
-pub struct ObjState {
-    attr2: u16,
-    attr1: u16,
-    attr0: u16,
+pub enum Shape {
+    ShapeSquare = sprite::Attr0::SHAPE_SQUARE.bits() as isize,
+    ShapeWide = sprite::Attr0::SHAPE_WIDE.bits() as isize,
+    ShapeTall = sprite::Attr0::SHAPE_TALL.bits() as isize,
 }
 
-bitflags! {
-    pub struct Attr0: u16 {
-        const SHAPE_SQUARE = 0b00_000000_00000000;
-        const SHAPE_WIDE = 0b01_000000_00000000;
-        const SHAPE_TALL = 0b10_000000_00000000;
-        // 0b11_000000_00000000: Forbidden
-        
-        const NORMAL = 0b0000_00_00_00000;
-        const TRANSLUCENT = 0b0000_01_00_00000;
-        const WINDOW = 0b0000_10_00_00000;
-        const BITMAP = 0b0000_11_00_00000;
+pub enum Size {
+    SizeSmall = sprite::Attr1::SIZE_SMALL.bits() as isize,
+    SizeMed = sprite::Attr1::SIZE_MED.bits() as isize,
+    SizeBig = sprite::Attr1::SIZE_BIG.bits() as isize,
+    SizeMax = sprite::Attr1::SIZE_MAX.bits() as isize,
+}
 
-        // TODO: The rest
-        /// Set for 256 colors, unset for 16
-        const COLOR_256 = bit!(13);
+// TODO: Maybe the `attr`s should be each one their own struct?
+#[repr(align(64))]
+#[derive(Clone, Copy)]
+pub struct Obj {
+    /// Contains shape, color, mosaic, mode, double-size, affine and y-coord
+    pub attr0: sprite::Attr0,
+    pub attr1: sprite::Attr1,
+    pub attr2: u16,
+}
+impl Obj {
+    pub fn bits(&self) -> u64 {
+        let mut bits = 0;
+        bits |= self.attr0.bits() as u64;
+        bits |= (self.attr1.bits() as u64) << 16;
+        bits |= (self.attr2 as u64) << 32;
+
+        bits
+    }
+    pub fn set_x(&mut self, x: u16) {
+        debug_assert!(x <= sprite::X_COORD_MASK, "x coord out of range");
+        let bits = self.attr1.bits() & !sprite::X_COORD_MASK;
+        self.attr1 = unsafe { sprite::Attr1::from_bits_unchecked(bits | x) };
+    }
+    pub fn set_y(&mut self, y: u16) {
+        debug_assert!(y <= sprite::Y_COORD_MASK, "y coord out of range");
+        let bits = self.attr0.bits() & !sprite::Y_COORD_MASK;
+        self.attr0 = unsafe { sprite::Attr0::from_bits_unchecked(bits | y) };
+    }
+    pub fn hide(&mut self) {
+        self.attr0.remove(sprite::Attr0::AFFINE_ENABLE);
+        self.attr0.insert(sprite::Attr0::DOUBLE_SIZE);
     }
 }
-bitflags! {
-    pub struct Attr1: u16 {
-        /// Small axis: 8 pixels / Large axis: 16 pixels. Square: 8 pixels
-        const SIZE_SMALL = 0b00_000000_00000000;
-        /// Small axis: 8 pixels / Large axis: 32 pixels. Square 16 pixels
-        const SIZE_MED = 0b01_000000_00000000;
-        /// Small axis: 16 pixels / Large axis: 32 pixels. Square 32 pixels
-        const SIZE_BIG = 0b10_000000_00000000;
-        /// Small axis: 32 pixels / Large axis: 64 pixels. Square 64 pixels
-        const SIZE_MAX = 0b11_000000_00000000;
-        
-        // TODO: The rest
+impl Default for Obj {
+    fn default() -> Self {
+        let mut obj = Obj {
+            attr0: sprite::Attr0::empty(),
+            attr1: sprite::Attr1::empty(),
+            attr2: 0,
+        };
+        obj.hide();
+        return obj;
     }
 }
-
-/// X Coord is in Attr1
-pub const X_COORD_MASK: u16 = 0b1_11111111;
-/// Y Coord is in Attr0
-pub const Y_COORD_MASK: u16 = 0b11111111;
-
-/// ID of the tile is in Attr2
-pub const ID_MASK: u16 = 0b11_11111111;
-
-/// Indexed mode: Sets the palette
-/// BMP mode: Sets transparency
-pub const COLOR: u16 = 0b1111_0000_00000000;
 

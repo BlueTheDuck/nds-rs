@@ -16,3 +16,4 @@ pub mod interrupts;
 pub mod system;
 pub mod video;
 pub mod bindings;
+pub mod sprite;
