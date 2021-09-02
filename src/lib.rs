@@ -5,7 +5,7 @@
 #![feature(const_generics)]
 #![allow(unused_parens)]
 
-pub use nds_entry::entry;
+pub use nds_proc_macros::{entry, panic_screen};
 pub use nds_sys as sys;
 
 extern crate alloc;
@@ -24,9 +24,10 @@ pub mod debug;
 pub mod dma;
 pub mod input;
 pub mod interrupts;
+mod panic;
+pub mod sprite;
 pub mod system;
 pub mod video;
-pub mod sprite;
 
 type CPtr = *mut core::ffi::c_void;
 extern "C" {
@@ -74,28 +75,9 @@ unsafe impl GlobalAlloc for MallocAlloc {
 
 #[alloc_error_handler]
 pub fn handle_alloc_error(_: Layout) -> ! {
-    debug::NOCASH.lock().print_with_params_no_alloc("Out of memory\0");
-    loop {
-        crate::interrupts::swi_wait_for_v_blank();
-    }
-}
-
-#[panic_handler]
-pub fn panic(info: &core::panic::PanicInfo) -> ! {
-    println!("Panic! At the DS");
-    unsafe {
-        // SAFETY: No other code will run after this function,
-        // so there is no problem in freeing the lock
-        debug::NOCASH.force_unlock();
-    }
-    let mut nocash = debug::NOCASH.lock();
-    nocash.print_with_params_no_alloc("r0: %r0%\0");
-    nocash.print_with_params_no_alloc("sp: %sp%\0");
-    nocash.print_with_params_no_alloc("lr: %lr%\0");
-    nocash.print_with_params_no_alloc("pc: %pc%\0");
-    if let Some(arg) = info.message() {
-        println!("{}", arg);
-    }
+    debug::NOCASH
+        .lock()
+        .print_with_params_no_alloc("Out of memory\0");
     loop {
         crate::interrupts::swi_wait_for_v_blank();
     }

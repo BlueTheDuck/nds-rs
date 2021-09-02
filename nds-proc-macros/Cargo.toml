@@ -1,5 +1,5 @@
 [package]
-name = "nds-entry"
+name = "nds-proc-macros"
 version = "0.1.0"
 authors = ["BlueTheDuck <no-reply@perezv.ar>"]
 edition = "2018"

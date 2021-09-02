@@ -8,11 +8,15 @@ edition = "2018"
 
 [dependencies]
 nds-sys = { path = "nds-sys" }
-nds-entry = { path = "nds-entry" }
+nds-proc-macros = { path = "nds-proc-macros" }
 bitflags = "*"
 paste = "*"
 lazy_static = { version = "*", features = ["spin_no_std"] }
 spin = { version = "*" }
 
 [workspace]
-members = [ "nds-sys", "nds-entry", "libc" ]
+members = [ "nds-sys", "nds-proc-macros", "libc" ]
+
+[features]
+default = ["default_panic_screen"]
+default_panic_screen = []
