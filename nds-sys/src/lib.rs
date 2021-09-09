@@ -10,10 +10,11 @@ macro_rules! bit {
 }
 
 pub mod background;
+pub mod bindings;
+pub mod debug;
 pub mod dma;
 pub mod input;
 pub mod interrupts;
+pub mod sprite;
 pub mod system;
 pub mod video;
-pub mod bindings;
-pub mod sprite;
