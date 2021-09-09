@@ -19,6 +19,7 @@ macro_rules! bit {
 }
 
 pub mod background;
+#[cfg(feature = "nocash_tty")]
 #[macro_use]
 pub mod debug;
 pub mod dma;
@@ -75,6 +76,7 @@ unsafe impl GlobalAlloc for MallocAlloc {
 
 #[alloc_error_handler]
 pub fn handle_alloc_error(_: Layout) -> ! {
+    #[cfg(feature = "nocash_tty")]
     debug::NOCASH
         .lock()
         .print_with_params_no_alloc("Out of memory\0");
@@ -82,3 +84,17 @@ pub fn handle_alloc_error(_: Layout) -> ! {
         crate::interrupts::swi_wait_for_v_blank();
     }
 }
+
+#[cfg(not(feature = "nocash_tty"))]
+pub mod debug {
+    #[macro_export]
+    macro_rules! print {
+        ($($arg:tt)*) => ();
+    }
+    #[macro_export]
+    macro_rules! println {
+        () => (print!('\n'));
+        ($($arg:tt)*) => ();
+    }
+}
+
