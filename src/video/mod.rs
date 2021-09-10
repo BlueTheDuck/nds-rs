@@ -11,6 +11,7 @@ pub mod colors {
     pub static RED: Color = Color(0b0_00000_00000_11111);
     pub static GREEN: Color = Color(0b0_00000_11111_00000);
     pub static BLUE: Color = Color(0b0_11111_00000_00000);
+    pub static WHITE: Color = Color(0b0_11111_11111_11111);
     pub static TRANSPARENT: Color = Color(0b1_00000_00000_00000);
 }
 

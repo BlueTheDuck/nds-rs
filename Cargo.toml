@@ -9,10 +9,10 @@ edition = "2018"
 [dependencies]
 nds-sys = { path = "nds-sys" }
 nds-proc-macros = { path = "nds-proc-macros" }
-bitflags = "*"
-paste = "*"
-lazy_static = { version = "*", features = ["spin_no_std"] }
-spin = { version = "*" }
+bitflags = "^1.3"
+paste = "^1.0"
+lazy_static = { version = "^1.4", features = [ "spin_no_std" ], optional = true }
+spin = { version = "^0.9", default-features = false, features = [ "spin_mutex" ] , optional = true }
 
 [workspace]
 members = [ "nds-sys", "nds-proc-macros", "libc" ]

@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use paste::paste;
 
 macro_rules! vramOffset {

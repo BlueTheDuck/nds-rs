@@ -2,7 +2,7 @@
 #![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
 #![feature(asm)]
-#![feature(const_generics)]
+#![feature(adt_const_params)]
 #![allow(unused_parens)]
 
 pub use nds_proc_macros::{entry, panic_screen};
