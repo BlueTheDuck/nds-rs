@@ -1,8 +1,9 @@
 use core::fmt::{Debug, Write};
-
-use lazy_static::lazy_static;
-use spin::Mutex;
 use nds_sys::debug::registers;
+#[cfg(feature = "nocash_tty")]
+use lazy_static::lazy_static;
+#[cfg(feature = "nocash_tty")]
+use spin::Mutex;
 
 #[macro_export]
 macro_rules! print {
@@ -24,10 +25,14 @@ macro_rules! println {
 /// Otherwise, is will be copied byte-by-byte to the [`Char Out`](registers::CHAR_OUT)
 #[inline]
 pub fn _print(args: core::fmt::Arguments) {
-    let mut nocash = NOCASH.lock();
-    write!(nocash, "{}\0", args).unwrap();
+    #[cfg(feature = "nocash_tty")]
+    {
+        let mut nocash = NOCASH.lock();
+        write!(nocash, "{}\0", args).unwrap();
+    }
 }
 
+#[cfg(feature = "nocash_tty")]
 lazy_static! {
     /// Used to access all NO$GBA debugging functions.
     /// The debugger is detected on startup, and if it is found,
