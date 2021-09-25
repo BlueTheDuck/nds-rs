@@ -5,6 +5,7 @@
 #![feature(adt_const_params)]
 #![allow(unused_parens)]
 
+#[cfg(feature = "proc_macros")]
 pub use nds_proc_macros::{entry, panic_screen};
 pub use nds_sys as sys;
 

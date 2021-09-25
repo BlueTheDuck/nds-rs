@@ -39,21 +39,19 @@ fn panic_screen() -> ! {
 }
 
 #[cfg(feature = "default_panic_screen")]
-mod panic {
-    #[crate::panic_screen]
-    fn panic_screen() -> ! {
-        // TODO: Remove dependencies on C and libnds
-        use crate::sys::bindings;
-        extern "C" {
-            fn iprintf(ptr: *const u8);
-        }
-        unsafe {
-            bindings::consoleDemoInit();
-            bindings::consoleClear();
-            iprintf(b"A panic has ocurred\0".as_ptr());
-        }
-        loop {
-            crate::interrupts::swi_wait_for_v_blank();
-        }
+#[no_mangle]
+pub extern "C" fn __nds_panic_screen() -> ! {
+    // TODO: Remove dependencies on C and libnds
+    use crate::sys::bindings;
+    extern "C" {
+        fn iprintf(ptr: *const u8);
+    }
+    unsafe {
+        bindings::consoleDemoInit();
+        bindings::consoleClear();
+        iprintf(b"A panic has ocurred\0".as_ptr());
+    }
+    loop {
+        crate::interrupts::swi_wait_for_v_blank();
     }
 }
