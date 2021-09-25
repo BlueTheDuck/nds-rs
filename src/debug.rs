@@ -54,12 +54,18 @@ pub struct NoCash {
     found: bool,
 }
 impl NoCash {
+    pub fn new() -> Self {
+        Self {
+            found: Self::get_emu_id().is_some(),
+        }
+    }
+
     /// The static instance [`NOCASH`] is disabled by default,
     /// this will try to find out if we are running in an emulator.
     /// On release, [`NoCash::get_emu_id()`] always returns [`None`], so
     /// all debugging is disabled
     fn find_debugger(&mut self) {
-        self.found = self.get_emu_id().is_some();
+        self.found = Self::get_emu_id().is_some();
     }
 
     #[inline]
@@ -123,7 +129,7 @@ impl NoCash {
 
     /// Returns a string identifying the emulator that the ROM is running on.
     /// Only NO$GBA supports this, so don't rely on it
-    pub fn get_emu_id(&self) -> Option<&'static str> {
+    pub fn get_emu_id() -> Option<&'static str> {
         if cfg!(debug_assertions) {
             let emu_id = unsafe { core::slice::from_raw_parts(registers::EMU_ID_PTR, 16) };
             core::str::from_utf8(emu_id).ok()
