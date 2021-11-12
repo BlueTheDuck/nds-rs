@@ -1,9 +1,10 @@
 use core::fmt::{Debug, Write};
-use nds_sys::debug::registers;
 #[cfg(feature = "nocash_tty")]
 use lazy_static::lazy_static;
+use nds_sys::debug::registers;
 #[cfg(feature = "nocash_tty")]
 use spin::Mutex;
+extern crate alloc;
 
 #[macro_export]
 macro_rules! print {
