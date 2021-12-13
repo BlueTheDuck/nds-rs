@@ -15,7 +15,7 @@ lazy_static = { version = "^1.4", features = [ "spin_no_std" ], optional = true 
 spin = { version = "^0.9", default-features = false, features = [ "spin_mutex" ] , optional = true }
 
 [workspace]
-members = [ "nds-sys", "nds-proc-macros", "libc" ]
+members = [ "nds-sys", "nds-proc-macros" ]
 
 [features]
 default = [ "default_panic_screen", "nocash_tty", "proc_macros" ]
