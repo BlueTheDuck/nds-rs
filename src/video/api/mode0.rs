@@ -8,6 +8,10 @@ use super::Engine;
 use super::TextBGMapData;
 use super::TextBg;
 
+///
+/// Creates a config object for the Main Engine. Uses Mode 0 2D¹.
+/// 
+/// ¹ https://libnds.devkitpro.org/video_8h.html#a1e46218ee302fcc8c77e4ea0968ea149
 pub fn create_main_mode0(
     map_base: u8,
     tiles_base: u8,
@@ -25,6 +29,14 @@ pub fn create_main_mode0(
 /* #region Mode 0 */
 impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
     fn new(map_base: u8, tiles_base: u8) -> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
+        debug_assert!(
+            map_base <= 0b111,
+            "screen_base must be a valid u3"
+        );
+        debug_assert!(
+            tiles_base <= 0b111,
+            "character_base must be a valid u3"
+        );
         Engine {
             layer0: TextBg::default(),
             layer1: TextBg::default(),
@@ -126,8 +138,10 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
         let ptr;
         unsafe {
             if MAIN {
+                // 0x06000000 + map_base * 0x10000 + map_block * 0x800
                 ptr = video::BG_GFX.add(self.map_base as usize * 0x10000 / 2 + map_base_block);
             } else {
+                // 0x06200000 + map_block * 0x800
                 ptr = video::BG_GFX_SUB.add(map_base_block);
             }
         }
@@ -152,6 +166,7 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
         };
         unsafe {
             if MAIN {
+                // 0x06000000 + tiles_base * 0x10000 + tiles_block * 0x4000
                 return video::BG_GFX
                     .add(self.tiles_base as usize * 0x10000 / 2 + tiles_base_block);
             } else {
