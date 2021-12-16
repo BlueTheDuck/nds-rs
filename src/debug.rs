@@ -5,6 +5,7 @@ use nds_sys::debug::registers;
 #[cfg(feature = "nocash_tty")]
 use spin::Mutex;
 extern crate alloc;
+use core::arch::asm;
 
 #[macro_export]
 macro_rules! print {

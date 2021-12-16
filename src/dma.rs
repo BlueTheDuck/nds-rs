@@ -34,6 +34,7 @@ use nds_sys::{
     dma::{calc_cr, calc_registers, Flags},
     interrupts,
 };
+use core::arch::asm;
 
 pub use nds_sys::dma::Channel;
 
