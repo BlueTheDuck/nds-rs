@@ -21,6 +21,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Install required packages
+      shell: bash
+      run: |
+        sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
+        sudo apt-get update¡
+        sudo apt-get install -y --no-install-recommends gdebi-core apt-utils
+      
+
     #- name: Install devkitPro
     #  shell: bash
     #  run: |
