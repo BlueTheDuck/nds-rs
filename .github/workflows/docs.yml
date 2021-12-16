@@ -25,22 +25,7 @@ jobs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends gcc build-essential
-      
-
-    #- name: Install devkitPro
-    #  shell: bash
-    #  run: |
-    #    sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
-    #    sudo apt-get update
-    #    sudo apt-get install -y --no-install-recommends apt-utils
-    #    sudo apt-get install -y --no-install-recommends gdebi-core apt-utils
-    #    wget https://github.com/devkitPro/pacman/releases/latest/download/devkitpro-pacman.amd64.deb && sudo gdebi -n devkitpro-pacman.amd64.deb && rm devkitpro-pacman.amd64.deb
-    #    echo -e "y\ny" | sudo dkp-pacman -Scc
-    #    sudo dkp-pacman -Sy
-    #    sudo dkp-pacman -Syu
-    #    sudo dkp-pacman -Sl
-    #    sudo dkp-pacman -S --noconfirm nds-dev
+        sudo apt-get install -y --no-install-recommends gcc build-essentials
 
 
     - name: Install Rust toolchain
