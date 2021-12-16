@@ -15,7 +15,7 @@ env:
 jobs:
   rustdoc:
     runs-on: ubuntu-latest
-    container: devkitpro/devkitarm::latest
+    container: devkitpro/devkitarm:latest
 
     steps:
     - name: Checkout repository
