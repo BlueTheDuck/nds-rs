@@ -24,9 +24,8 @@ jobs:
     - name: Install required packages
       shell: bash
       run: |
-        #sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends gdebi-core apt-utils
+        sudo apt-get install -y --no-install-recommends cc
       
 
     #- name: Install devkitPro
@@ -53,7 +52,9 @@ jobs:
         components: rustfmt, rust-src
 
     - name: Build Documentation
-      run: cargo doc --no-deps --quiet --workspace
+      run: |
+        export PATH="$PATH:$DEVKITARM/bin"
+        cargo doc --no-deps --quiet --workspace
 
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v3.8.0
