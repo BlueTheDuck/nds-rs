@@ -26,7 +26,6 @@ jobs:
         sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends apt-utils
-        sudo apt-get install -y --no-install-recommends sudo ca-certificates pkg-config curl wget bzip2 xz-utils make bsdtar doxygen gnupg
         sudo apt-get install -y --no-install-recommends gdebi-core apt-utils
         wget https://github.com/devkitPro/pacman/releases/latest/download/devkitpro-pacman.amd64.deb && sudo gdebi -n devkitpro-pacman.amd64.deb && rm devkitpro-pacman.amd64.deb
         yes | sudo dkp-pacman -Scc
