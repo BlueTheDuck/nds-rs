@@ -44,7 +44,7 @@ jobs:
         
         
     - name: Create an index.html page
-      run: echo "<meta http-equiv="refresh" content="0; URL=nds/index.html" />" >> ./target/doc/index.html
+      run: echo "<meta http-equiv="refresh" content="0; URL=nds/index.html" />" >> ./target/nds/doc/index.html
         
 
     - name: Deploy Docs
@@ -52,5 +52,5 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
-        publish_dir: ./target/doc
+        publish_dir: ./target/nds/doc
         force_orphan: true
