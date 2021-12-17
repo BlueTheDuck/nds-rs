@@ -44,8 +44,7 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: "./target/doc"
-        path: warn
+        path: ./target/doc
         
 
     - name: Deploy Docs
