@@ -38,13 +38,9 @@ jobs:
 
     - name: Build Documentation
       run: |
+        pwd
         export PATH="$PATH:$DEVKITARM/bin"
         cargo doc
-        
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.3.1
-      with:
-        path: ./target/doc
         
 
     - name: Deploy Docs
