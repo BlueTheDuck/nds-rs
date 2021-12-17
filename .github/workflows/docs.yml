@@ -40,7 +40,11 @@ jobs:
       run: |
         pwd
         export PATH="$PATH:$DEVKITARM/bin"
-        cargo doc
+        cargo doc --no-deps --open -p nds-sys -p nds
+        
+        
+    - name: Create an index.html page
+      run: echo "<meta http-equiv="refresh" content="0; URL=nds/index.html" />" >> ./target/doc/index.html
         
 
     - name: Deploy Docs
