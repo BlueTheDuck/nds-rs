@@ -15,23 +15,17 @@ env:
 jobs:
   rustdoc:
     runs-on: ubuntu-latest
+    container: devkitpro/devkitarm:latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Install devkitPro
+    - name: Install required packages
       shell: bash
       run: |
-        sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends apt-utils
-        sudo apt-get install -y --no-install-recommends gdebi-core apt-utils
-        wget https://github.com/devkitPro/pacman/releases/latest/download/devkitpro-pacman.amd64.deb && sudo gdebi -n devkitpro-pacman.amd64.deb && rm devkitpro-pacman.amd64.deb
-        yes | sudo dkp-pacman -Scc
-        sudo dkp-pacman -Sy
-        sudo dkp-pacman -Syu
-        sudo dkp-pacman -S --noconfirm nds-dev
+        sudo apt-get install -y --no-install-recommends gcc build-essential
 
 
     - name: Install Rust toolchain
@@ -43,12 +37,20 @@ jobs:
         components: rustfmt, rust-src
 
     - name: Build Documentation
-      run: cargo doc --no-deps --quiet --workspace
+      run: |
+        pwd
+        export PATH="$PATH:$DEVKITARM/bin"
+        cargo doc --no-deps --open -p nds-sys -p nds
+        
+        
+    - name: Create an index.html page
+      run: echo "<meta http-equiv="refresh" content="0; URL=nds/index.html" />" >> ./target/nds/doc/index.html
+        
 
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v3.8.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
-        publish_dir: ./target/doc
+        publish_dir: ./target/nds/doc
         force_orphan: true
