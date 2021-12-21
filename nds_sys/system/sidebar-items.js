@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["getBatteryLevel",""],["systemShutDown",""]],"static":[["REG_POWERCNT",""]],"struct":[["PowerFlags",""]]});

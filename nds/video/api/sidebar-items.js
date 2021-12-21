@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["BackgroundId",""]],"fn":[["create_main_mode0","Creates a config object for the Main Engine. Uses Mode 0 2D¹."]],"struct":[["Engine",""],["SixteenTileData",""],["TextBGMapData",""],["TextBg",""]]});

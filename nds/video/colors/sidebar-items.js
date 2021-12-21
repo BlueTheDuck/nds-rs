@@ -1,0 +1,1 @@
+initSidebarItems({"static":[["BLACK",""],["BLUE",""],["GREEN",""],["RED",""],["TRANSPARENT",""],["WHITE",""]]});

@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["nds"] = [{"text":"impl From&lt;usize&gt; for <a class=\"enum\" href=\"nds/background/enum.BackgroundId.html\" title=\"enum nds::background::BackgroundId\">BackgroundId</a>","synthetic":false,"types":["nds::background::BackgroundId"]},{"text":"impl From&lt;<a class=\"struct\" href=\"nds/video/struct.Color.html\" title=\"struct nds::video::Color\">Color</a>&gt; for u16","synthetic":false,"types":[]}];
+implementors["nds_sys"] = [{"text":"impl&lt;N:&nbsp;Into&lt;usize&gt;&gt; From&lt;N&gt; for <a class=\"enum\" href=\"nds_sys/background/enum.BgType.html\" title=\"enum nds_sys::background::BgType\">BgType</a>","synthetic":false,"types":["nds_sys::background::BgType"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

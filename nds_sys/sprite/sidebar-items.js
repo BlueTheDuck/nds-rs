@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["COLOR","Indexed mode: Sets the palette BMP mode: Sets transparency"],["ID_MASK","ID of the tile is in Attr2"],["X_COORD_MASK","X pos field in [Attr1] is 9 bits long. "],["Y_COORD_MASK","Y pos field in [Attr0] is 8 bits long. "]],"struct":[["Attr0",""],["Attr1",""]]});

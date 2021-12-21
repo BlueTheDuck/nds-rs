@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Mode","Type of mapping that can be used with Bank `E`."]],"fn":[["disable","Disable this bank without changing its configuration"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["BackgroundId",""],["BgSize",""],["BgType",""],["Layer",""]],"static":[["MAIN_BG0",""],["MAIN_BG1",""],["MAIN_BG2",""],["MAIN_BG3",""],["SUB_BG0",""],["SUB_BG1",""],["SUB_BG2",""],["SUB_BG3",""]],"struct":[["Background",""]]});
