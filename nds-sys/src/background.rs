@@ -188,7 +188,7 @@ pub unsafe fn bg_get_gfx_ptr(id: usize) -> *mut u16 {
             }
         }
         _ => {
-            unreachable!("Background type is not any of: enum BgType {Text8, Text4, Rotation, ExRotation, Bmp8, Bmp16}");
+            unreachable!("{}", "Background type is not any of: enum BgType {Text8, Text4, Rotation, ExRotation, Bmp8, Bmp16}");
         }
     }
 }
