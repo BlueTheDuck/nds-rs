@@ -32,6 +32,7 @@ macro_rules! bank {
                         $mode = $val,
                     )+
                 }
+                pub use Mode::*;
             }
 
             impl Mode {
