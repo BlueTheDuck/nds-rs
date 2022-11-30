@@ -6,6 +6,9 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = [ "nds-sys", "nds-proc-macros" ]
+
 [dependencies]
 nds-sys = { path = "nds-sys" }
 nds-proc-macros = { path = "nds-proc-macros", optional = true }
@@ -14,11 +17,8 @@ paste = "^1.0"
 lazy_static = { version = "^1.4", features = [ "spin_no_std" ], optional = true }
 spin = { version = "^0.9", default-features = false, features = [ "spin_mutex" ] , optional = true }
 
-[workspace]
-members = [ "nds-sys", "nds-proc-macros" ]
-
 [features]
-default = [ "default_panic_screen", "nocash_tty", "proc_macros" ]
+default = ["default_panic_screen", "nocash_tty", "proc_macros"]
 default_panic_screen = []
-nocash_tty = [ "spin", "lazy_static" ]
-proc_macros = [ "nds-proc-macros" ]
+nocash_tty = ["spin", "lazy_static"]
+proc_macros = ["nds-proc-macros"]

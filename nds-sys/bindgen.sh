@@ -8,7 +8,7 @@ bindgen "$DEVKITPRO/libnds/include/nds.h" \
     --distrust-clang-mangling \
     --no-doc-comments \
     --no-layout-tests \
-    --ctypes-prefix "::libc" \
+    --ctypes-prefix "core::ffi" \
     --no-prepend-enum-name \
     --generate "functions,types,vars" \
     --blacklist-type "u(8|16|32|64)" \

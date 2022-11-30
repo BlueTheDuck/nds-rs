@@ -1,6 +1,6 @@
 {
   "data-layout": "e-m:e-p:32:32-Fi8-i64:64-v128:64:128-a:0:32-n32-S64",
-  "llvm-target": "armv5te-devkitpro-none-eabi",
+  "llvm-target": "armv5te-none-eabi",
   "abi": "eabi",
   "arch": "arm",
   "linker": "arm-none-eabi-gcc",
@@ -8,7 +8,7 @@
   "linker-is-gnu": true,
   "archive-format": "gnu",
   "dynamic-linking": false,
-  "target-family": "unix",
+  "target-family": "none",
   "target-endian": "little",
   "target-pointer-width": "32",
   "target-c-int-width": "32",
@@ -25,8 +25,7 @@
   "crt-static-respected": true,
   "crt-static-default": true,
   "no-default-libraries": false,
-  "env": "musl",
-  "has-elf-tls": true,
+  "env": "newlib",
   "has-rpath": false,
   "is-builtin": false,
   "position-independent-executables": false,
@@ -44,5 +43,6 @@
     ]
   },
   "relocation-model": "static",
-  "relro-level": "none"
+  "relro-level": "none",
+  "vendor": "nintendo"
 }

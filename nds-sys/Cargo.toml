@@ -10,4 +10,4 @@ links = "nds"
 
 [dependencies]
 bitflags = "1.2"
-libc = { path = "../libc" }
+libc = { version = "0.2.137", features = ["extra_traits", "const-extern-fn"] }
