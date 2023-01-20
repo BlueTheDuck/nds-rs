@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
+#![allow(unused_imports)]
 
+use core::default;
 use paste::paste;
 
 macro_rules! vramOffset {
@@ -25,7 +27,7 @@ macro_rules! bank {
             paste::paste! {
                 #[doc = "Type of mapping that can be used with Bank `" $nm "`." ]
                 #[repr(u8)]
-                #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+                #[derive(Copy, Clone, Debug, Eq, PartialEq, Default)]
                 pub enum Mode {
                     $(
                         $(#[$inner $($args)*])*
@@ -59,6 +61,7 @@ bank! {
     control: nds_sys::video::VRAM_A_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
@@ -92,6 +95,7 @@ bank! {
     control: nds_sys::video::VRAM_B_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
@@ -125,6 +129,7 @@ bank! {
     control: nds_sys::video::VRAM_C_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
@@ -160,6 +165,7 @@ bank! {
     control: nds_sys::video::VRAM_D_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Main's background slot 0. (Address: 0x06000000)
@@ -195,6 +201,7 @@ bank! {
     control: nds_sys::video::VRAM_E_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Main's background, first half, slot 0
@@ -216,6 +223,7 @@ bank! {
     control: nds_sys::video::VRAM_F_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Main's background first part, first half, slot 0. (Address: 0x06000000)
@@ -260,6 +268,7 @@ bank! {
     control: nds_sys::video::VRAM_G_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Main's background first part, first half, slot 0. (Address: 0x06000000)
@@ -304,6 +313,7 @@ bank! {
     control: nds_sys::video::VRAM_H_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Sub's background first 2 parts of slot 0
@@ -319,6 +329,7 @@ bank! {
     control: nds_sys::video::VRAM_I_CR;
     modes: {
         /// Maps Bank to LCD.
+        #[default]
         Lcd = 0,
 
         /// Maps Bank to Sub's background thirth part of slot 0. (Address: 0x06208000)
