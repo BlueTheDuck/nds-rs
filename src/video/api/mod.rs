@@ -1,5 +1,4 @@
 use crate::sys::background as bg;
-use crate::sys::video;
 
 pub struct Engine<L1, L2, L3, L4, const MAIN: bool> {
     layer3: L4,
@@ -88,35 +87,50 @@ impl Default for TextBg {
 
 const TILE_ID_MASK: u16 = 0b11_11111111;
 
+/// Represents one tile on the screen for text 
+/// backgrounds or affine extended backgrounds.
+#[derive(Debug, Copy, Clone, Default)]
 #[repr(transparent)]
-#[derive(Clone, Copy)]
-pub struct TextBGMapData(u16);
-impl TextBGMapData {
-    pub fn get_palette_idx(&self) -> u8 {
-        let pal = self.0 >> 12;
-        return (pal & 0b1111) as u8;
+pub struct TextTileData(u16);
+impl TextTileData {
+    pub fn new() -> Self {
+        Self(0)
     }
-    pub fn get_tile_id(&self) -> u16 {
-        self.0 & TILE_ID_MASK
+
+    pub fn palette(&self) -> u8 {
+        (self.0 >> 12) as u8
     }
-    pub fn set_tile_id(&mut self, id: u16) {
-        assert!(id <= TILE_ID_MASK);
-        self.0 = (self.0 & !TILE_ID_MASK) | id;
+    pub fn set_palette(&mut self, palette: u8) {
+        self.0 = (self.0 & 0x0FFF) | ((palette as u16) << 12);
     }
-    pub fn get_flip(&self) -> (bool, bool) {
-        let bits = (self.0 >> 10) & 0b11;
-        let flip: (bool, bool) = (bits & 0b10 != 0, bits & 0b01 != 0);
-        return flip;
+    pub fn hflip(&self) -> bool {
+        (self.0 & bit!(10)) != 0
     }
-    pub fn set_flip(&mut self, flips: (bool, bool)) {
-        if flips.0 {
-            self.0 |= 0b00001000_00000000;
+    pub fn set_hflip(&mut self, hflip: bool) {
+        if hflip {
+            self.0 |= bit!(10);
+        } else {
+            self.0 &= !bit!(10);
         }
-        if flips.1 {
-            self.0 |= 0b00000100_00000000;
+    }
+    pub fn vflip(&self) -> bool {
+        (self.0 & bit!(11)) != 0
+    }
+    pub fn set_vflip(&mut self, vflip: bool) {
+        if vflip {
+            self.0 |= bit!(11);
+        } else {
+            self.0 &= !bit!(11);
         }
+    }
+    pub fn tile_index(&self) -> u16 {
+        self.0 & 0x03FF
+    }
+    pub fn set_tile_index(&mut self, tile_index: u16) {
+        self.0 = (self.0 & 0xFC00) | (tile_index & 0x03FF);
     }
 }
+
 
 #[derive(Clone, Copy)]
 pub struct SixteenTileData(pub u16);

@@ -1,9 +1,8 @@
 #![no_std]
 #![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
-#![feature(asm)]
 #![feature(adt_const_params)]
-#![allow(unused_parens)]
+#![allow(unused_parens, dead_code)]
 
 #[cfg(feature = "proc_macros")]
 pub use nds_proc_macros::{entry, panic_screen};

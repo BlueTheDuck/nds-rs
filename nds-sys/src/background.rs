@@ -102,53 +102,56 @@ impl<N: Into<usize>> From<N> for BgType {
 #[repr(C)]
 pub enum BgSize {
     /// 128 x 128 pixel rotation background
-    BgSize_R_128x128 = (0 << 14),
+    RotationSmallest = (0 << 14),
     /// 256 x 256 pixel rotation background
-    BgSize_R_256x256 = (1 << 14),
+    RotationSmall = (1 << 14),
     /// 512 x 512 pixel rotation background
-    BgSize_R_512x512 = (2 << 14),
+    RotationBig = (2 << 14),
     /// 1024 x 1024 pixel rotation background
-    BgSize_R_1024x1024 = (3 << 14),
+    RotationBiggest = (3 << 14),
 
     /// 256 x 256 pixel text background
-    BgSize_T_256x256 = (0 << 14) | (1 << 16),
+    TextSmall = (0 << 14) | (1 << 16),
     /// 512 x 256 pixel text background
-    BgSize_T_512x256 = (1 << 14) | (1 << 16),
+    TextWide = (1 << 14) | (1 << 16),
     /// 256 x 512 pixel text background
-    BgSize_T_256x512 = (2 << 14) | (1 << 16),
+    TextTall = (2 << 14) | (1 << 16),
     /// 512 x 512 pixel text background
-    BgSize_T_512x512 = (3 << 14) | (1 << 16),
+    TextBig = (3 << 14) | (1 << 16),
 
     /// 128 x 128 pixel extended rotation background
-    BgSize_ER_128x128 = (0 << 14) | (2 << 16),
+    ExRotSmallest = (0 << 14) | (2 << 16),
     /// 256 x 256 pixel extended rotation background
-    BgSize_ER_256x256 = (1 << 14) | (2 << 16),
+    ExRotSmall = (1 << 14) | (2 << 16),
     /// 512 x 512 pixel extended rotation background
-    BgSize_ER_512x512 = (2 << 14) | (2 << 16),
+    ExRotBig = (2 << 14) | (2 << 16),
     /// 1024 x 1024 extended pixel rotation background
-    BgSize_ER_1024x1024 = (3 << 14) | (2 << 16),
+    ExRotBiggest = (3 << 14) | (2 << 16),
 
+    // 256 color bitmap
     /// 128 x 128 pixel 8 bit bitmap background
-    BgSize_B8_128x128 = ((0 << 14) | bit!(7) | (3 << 16)),
+    BitmapSmallest = ((0 << 14) | bit!(7) | (3 << 16)),
     /// 256 x 256 pixel 8 bit bitmap background
-    BgSize_B8_256x256 = ((1 << 14) | bit!(7) | (3 << 16)),
+    BitmapSmall = ((1 << 14) | bit!(7) | (3 << 16)),
     /// 512 x 256 pixel 8 bit bitmap background
-    BgSize_B8_512x256 = ((2 << 14) | bit!(7) | (3 << 16)),
+    BitmapWide = ((2 << 14) | bit!(7) | (3 << 16)),
     /// 512 x 512 pixel 8 bit bitmap background
-    BgSize_B8_512x512 = ((3 << 14) | bit!(7) | (3 << 16)),
-    /// 1024 x 512 pixel 8 bit bitmap background
-    BgSize_B8_1024x512 = (1 << 14) | (3 << 16),
-    /// 512 x 1024 pixel 8 bit bitmap background
-    BgSize_B8_512x1024 = (0) | (3 << 16),
+    BitmapBig = ((3 << 14) | bit!(7) | (3 << 16)),
 
+    /// 1024 x 512 pixel 8 bit bitmap background
+    LargeBitmapWide = (1 << 14) | (3 << 16),
+    /// 512 x 1024 pixel 8 bit bitmap background
+    LargeBitmapTall = (0) | (3 << 16),
+
+    // Direct color bitmap bg
     /// 128 x 128 pixel 16 bit bitmap background
-    BgSize_B16_128x128 = ((0 << 14) | bit!(7) | bit!(2) | (4 << 16)),
+    FullBitmapSmallest = ((0 << 14) | bit!(7) | bit!(2) | (4 << 16)),
     /// 256 x 256 pixel 16 bit bitmap background
-    BgSize_B16_256x256 = ((1 << 14) | bit!(7) | bit!(2) | (4 << 16)),
+    FullBitmapSmall = ((1 << 14) | bit!(7) | bit!(2) | (4 << 16)),
+    /// 512 x 256 pixel 16 bit bitmap background
+    FullBitmapWide = ((2 << 14) | bit!(7) | bit!(2) | (4 << 16)),
     /// 512 x 512 pixel 16 bit bitmap background
-    BgSize_B16_512x256 = ((2 << 14) | bit!(7) | bit!(2) | (4 << 16)),
-    /// 1024 x 1024 pixel 16 bit bitmap background
-    BgSize_B16_512x512 = ((3 << 14) | bit!(7) | bit!(2) | (4 << 16)),
+    FullBitmapBiggest = ((3 << 14) | bit!(7) | bit!(2) | (4 << 16)),
 }
 
 #[repr(C)]

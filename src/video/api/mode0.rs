@@ -5,7 +5,7 @@ use crate::sys::video;
 
 use super::BackgroundId;
 use super::Engine;
-use super::TextBGMapData;
+use super::TextTileData;
 use super::TextBg;
 
 ///
@@ -119,7 +119,7 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
     }
 
     // Screen/map ptr
-    pub fn get_map(&self, bg: BackgroundId) -> &mut [TextBGMapData] {
+    pub fn get_map(&self, bg: BackgroundId) -> &mut [TextTileData] {
         let map_base_block = {
             let map_base = match bg {
                 BackgroundId::Bg0 => self.layer0.map_base,
@@ -147,8 +147,8 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
         }
         unsafe {
             core::slice::from_raw_parts_mut(
-                ptr as *mut TextBGMapData,
-                map_size / size_of::<TextBGMapData>(),
+                ptr as *mut _,
+                map_size / size_of::<TextTileData>(),
             )
         }
     }
