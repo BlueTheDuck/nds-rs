@@ -162,6 +162,52 @@ pub enum Layer {
     Layer3 = 3,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(C)]
+pub enum BackgroundId {
+    MainBg0 = 0,
+    MainBg1 = 1,
+    MainBg2 = 2,
+    MainBg3 = 3,
+    SubBg0 = 4,
+    SubBg1 = 5,
+    SubBg2 = 6,
+    SubBg3 = 7,
+}
+impl BackgroundId {
+    pub const fn is_main(&self) -> bool {
+        match self {
+            Self::MainBg0 | Self::MainBg1 | Self::MainBg2 | Self::MainBg3 => true,
+            _ => false,
+        }
+    }
+    pub fn get_layer(self) -> Layer {
+        match self {
+            BackgroundId::MainBg0 | BackgroundId::SubBg0 => Layer::Layer0,
+            BackgroundId::MainBg1 | BackgroundId::SubBg1 => Layer::Layer1,
+            BackgroundId::MainBg2 | BackgroundId::SubBg2 => Layer::Layer2,
+            BackgroundId::MainBg3 | BackgroundId::SubBg3 => Layer::Layer3,
+        }
+    }
+}
+impl TryFrom<usize> for BackgroundId {
+    type Error = &'static str;
+
+    fn try_from(id: usize) -> Result<Self, Self::Error> {
+        match id {
+            0 => Ok(BackgroundId::MainBg0),
+            1 => Ok(BackgroundId::MainBg1),
+            2 => Ok(BackgroundId::MainBg2),
+            3 => Ok(BackgroundId::MainBg3),
+            4 => Ok(BackgroundId::SubBg0),
+            5 => Ok(BackgroundId::SubBg1),
+            6 => Ok(BackgroundId::SubBg2),
+            7 => Ok(BackgroundId::SubBg3),
+            _ => Err("Tried to convert unknown value to background ID")
+        }
+    }
+}
+
 pub unsafe fn bg_get_tile_base(id: usize) -> usize {
     let cnt = bgControl[id].read_volatile() >> 2;
     return (cnt & 15) as usize;

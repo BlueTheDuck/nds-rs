@@ -16,15 +16,6 @@ pub struct Engine<L1, L2, L3, L4, const MAIN: bool> {
     tiles_base: u8,
 }
 
-#[repr(u8)]
-#[derive(Clone, Copy)]
-pub enum BackgroundId {
-    Bg0,
-    Bg1,
-    Bg2,
-    Bg3,
-}
-
 /* #region Text BG */
 enum TextScreenSize {
     /// 256x256

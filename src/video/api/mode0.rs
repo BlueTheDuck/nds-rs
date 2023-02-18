@@ -3,14 +3,13 @@ use core::mem::size_of;
 use crate::sys::background as bg;
 use crate::sys::video;
 
-use super::BackgroundId;
 use super::Engine;
-use super::TextTileData;
 use super::TextBg;
+use super::TextTileData;
 
 ///
 /// Creates a config object for the Main Engine. Uses Mode 0 2D¹.
-/// 
+///
 /// ¹ https://libnds.devkitpro.org/video_8h.html#a1e46218ee302fcc8c77e4ea0968ea149
 pub fn create_main_mode0(
     map_base: u8,
@@ -29,14 +28,8 @@ pub fn create_main_mode0(
 /* #region Mode 0 */
 impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
     fn new(map_base: u8, tiles_base: u8) -> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
-        debug_assert!(
-            map_base <= 0b111,
-            "screen_base must be a valid u3"
-        );
-        debug_assert!(
-            tiles_base <= 0b111,
-            "character_base must be a valid u3"
-        );
+        debug_assert!(map_base <= 0b111, "screen_base must be a valid u3");
+        debug_assert!(tiles_base <= 0b111, "character_base must be a valid u3");
         Engine {
             layer0: TextBg::default(),
             layer1: TextBg::default(),
@@ -119,21 +112,23 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
     }
 
     // Screen/map ptr
-    pub fn get_map(&self, bg: BackgroundId) -> &mut [TextTileData] {
+    pub fn get_map(&self, bg: u8) -> &mut [TextTileData] {
         let map_base_block = {
             let map_base = match bg {
-                BackgroundId::Bg0 => self.layer0.map_base,
-                BackgroundId::Bg1 => self.layer1.map_base,
-                BackgroundId::Bg2 => self.layer2.map_base,
-                BackgroundId::Bg3 => self.layer3.map_base,
+                0 => self.layer0.map_base,
+                1 => self.layer1.map_base,
+                2 => self.layer2.map_base,
+                3 => self.layer3.map_base,
+                _ => unreachable!()
             } as usize;
             map_base * 0x800 / 2
         };
         let map_size = match bg {
-            BackgroundId::Bg0 => self.layer0.get_map_size(),
-            BackgroundId::Bg1 => self.layer1.get_map_size(),
-            BackgroundId::Bg2 => self.layer2.get_map_size(),
-            BackgroundId::Bg3 => self.layer3.get_map_size(),
+            0 => self.layer0.get_map_size(),
+            1 => self.layer1.get_map_size(),
+            2 => self.layer2.get_map_size(),
+            3 => self.layer3.get_map_size(),
+            _ => unreachable!()
         };
         let ptr;
         unsafe {
@@ -146,21 +141,19 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
             }
         }
         unsafe {
-            core::slice::from_raw_parts_mut(
-                ptr as *mut _,
-                map_size / size_of::<TextTileData>(),
-            )
+            core::slice::from_raw_parts_mut(ptr as *mut _, map_size / size_of::<TextTileData>())
         }
     }
 
     // Character/tiles ptr
-    pub fn get_tiles_ptr(&self, bg: BackgroundId) -> *mut u16 {
+    pub fn get_tiles_ptr(&self, bg: u8) -> *mut u16 {
         let tiles_base_block = {
             let tiles_base = match bg {
-                BackgroundId::Bg0 => self.layer0.tiles_base,
-                BackgroundId::Bg1 => self.layer1.tiles_base,
-                BackgroundId::Bg2 => self.layer2.tiles_base,
-                BackgroundId::Bg3 => self.layer3.tiles_base,
+                0 => self.layer0.tiles_base,
+                1 => self.layer1.tiles_base,
+                2 => self.layer2.tiles_base,
+                3 => self.layer3.tiles_base,
+                _ => unreachable!()
             } as usize;
             tiles_base * 0x4000 / 2
         };
@@ -175,31 +168,34 @@ impl<const MAIN: bool> Engine<TextBg, TextBg, TextBg, TextBg, MAIN> {
         }
     }
 
-    pub fn set_visibility(&mut self, bg: BackgroundId, show: bool) {
+    pub fn set_visibility(&mut self, bg: u8, show: bool) {
         match bg {
-            BackgroundId::Bg0 => self.display0 = show,
-            BackgroundId::Bg1 => self.display1 = show,
-            BackgroundId::Bg2 => self.display2 = show,
-            BackgroundId::Bg3 => self.display3 = show,
+            0 => self.display0 = show,
+            1 => self.display1 = show,
+            2 => self.display2 = show,
+            3 => self.display3 = show,
+            _ => unreachable!()
         };
     }
 
     /// `map_offset` must be less than 32
     /// `tiles_offset` must be less than 16
-    pub fn set_bg_offsets(&mut self, bg: BackgroundId, map_offset: u8, tiles_offset: u8) {
+    pub fn set_bg_offsets(&mut self, bg: u8, map_offset: u8, tiles_offset: u8) {
         debug_assert!(map_offset <= 0b11111, "screen_base must be a valid u5");
         match bg {
-            BackgroundId::Bg0 => self.layer0.map_base = map_offset,
-            BackgroundId::Bg1 => self.layer1.map_base = map_offset,
-            BackgroundId::Bg2 => self.layer2.map_base = map_offset,
-            BackgroundId::Bg3 => self.layer3.map_base = map_offset,
+            0 => self.layer0.map_base = map_offset,
+            1 => self.layer1.map_base = map_offset,
+            2 => self.layer2.map_base = map_offset,
+            3 => self.layer3.map_base = map_offset,
+            _ => unreachable!()
         };
         debug_assert!(tiles_offset <= 0b1111, "character_base must be a valid u4");
         match bg {
-            BackgroundId::Bg0 => self.layer0.tiles_base = tiles_offset,
-            BackgroundId::Bg1 => self.layer1.tiles_base = tiles_offset,
-            BackgroundId::Bg2 => self.layer2.tiles_base = tiles_offset,
-            BackgroundId::Bg3 => self.layer3.tiles_base = tiles_offset,
+            0 => self.layer0.tiles_base = tiles_offset,
+            1 => self.layer1.tiles_base = tiles_offset,
+            2 => self.layer2.tiles_base = tiles_offset,
+            3 => self.layer3.tiles_base = tiles_offset,
+            _ => unreachable!()
         };
     }
 }
