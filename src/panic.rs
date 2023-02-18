@@ -5,7 +5,7 @@ use crate::println;
 #[panic_handler]
 pub fn panic(info: &core::panic::PanicInfo) -> ! {
     unsafe {
-        crate::sys::bindings::DC_FlushAll();
+        nds_sys::cache::DC_FlushAll();
     }
     println!("Panic! At the DS");
     #[cfg(feature = "nocash_tty")]

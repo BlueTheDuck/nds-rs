@@ -3368,24 +3368,6 @@ extern "C" {
     pub fn bgUpdate();
 }
 extern "C" {
-    pub fn IC_InvalidateAll();
-}
-extern "C" {
-    pub fn IC_InvalidateRange(base: *const core::ffi::c_void, size: u32_);
-}
-extern "C" {
-    pub fn DC_FlushAll();
-}
-extern "C" {
-    pub fn DC_FlushRange(base: *const core::ffi::c_void, size: u32_);
-}
-extern "C" {
-    pub fn DC_InvalidateAll();
-}
-extern "C" {
-    pub fn DC_InvalidateRange(base: *const core::ffi::c_void, size: u32_);
-}
-extern "C" {
     pub fn sinLerp(angle: s16) -> s16;
 }
 extern "C" {

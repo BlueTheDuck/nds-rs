@@ -25,3 +25,4 @@ mod panic;
 pub mod sprite;
 pub mod system;
 pub mod video;
+pub mod cache;
