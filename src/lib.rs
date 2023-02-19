@@ -25,4 +25,6 @@ mod panic;
 pub mod sprite;
 pub mod system;
 pub mod video;
+#[cfg(feature = "embedded-graphics-core")]
+pub mod embedded_graphics;
 pub mod cache;

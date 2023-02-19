@@ -9,6 +9,9 @@ pub const REG_DISPCNT: *mut u32 = 0x04000000 as _;
 /// Display control register (sub). Used to choose the mode for the Sub Engine
 pub const REG_DISPCNT_SUB: *mut u32 = 0x04001000 as _;
 
+pub const SCREEN_HEIGHT: u32 = 192;
+pub const SCREEN_WIDTH: u32 = 256;
+
 pub const VRAM_ENABLE: u8 = 1 << 7;
 
 /// Control register for VRAM A
