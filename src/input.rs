@@ -25,6 +25,41 @@ pub enum KeyState {
     Down,
     Held,
 }
+
+impl KeyState {
+    /// Returns `true` if the key state is [`Up`].
+    ///
+    /// [`Up`]: KeyState::Up
+    #[must_use]
+    pub fn is_up(&self) -> bool {
+        matches!(self, Self::Up)
+    }
+
+    /// Returns `true` if the key state is [`Down`].
+    ///
+    /// [`Down`]: KeyState::Down
+    #[must_use]
+    pub fn is_down(&self) -> bool {
+        matches!(self, Self::Down)
+    }
+
+    /// Returns `true` if the key state is [`Held`].
+    ///
+    /// [`Held`]: KeyState::Held
+    #[must_use]
+    pub fn is_held(&self) -> bool {
+        matches!(self, Self::Held)
+    }
+
+    /// Returns `true` if the key state is [`Down`] or [`Held`]
+    /// 
+    /// [`Down`]: KeyState::Down
+    /// [`Held`]: KeyState::Held
+    #[must_use]
+    pub fn is_pressed(&self) -> bool {
+        self.is_down() || self.is_held()
+    }
+}
 impl Default for KeyState {
     fn default() -> Self {
         Self::Up
