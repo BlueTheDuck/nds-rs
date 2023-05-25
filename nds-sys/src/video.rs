@@ -48,7 +48,8 @@ pub const BG_PALETTE: *mut u16 = 0x05000000 as _;
 pub const BG_PALETTE_SUB: *mut u16 = 0x05000400 as _;
 
 bitflags! {
-    pub struct Flags: u32 {
+    /// Display control flags
+    pub struct DispCntFlags: u32 {
         /// Use extended palette
         const EXT_PALETTE = bit!(30);
         // These are mutually exclusive
@@ -102,3 +103,16 @@ pub const MAP_BASE_OFFSET: u32 = 27;
 pub const TILES_BASE_OFFSET: u32 = 24;
 pub const MAP_BASE_MASK: u32 = 3 << 27;
 pub const TILES_BASE_MASK: u32 = 3 << 24;
+
+pub unsafe fn set_video_mode(flags: DispCntFlags) {
+    REG_DISPCNT.write_volatile(flags.bits());
+}
+
+pub unsafe fn set_video_mode_sub(flags: DispCntFlags) {
+    REG_DISPCNT_SUB.write_volatile(flags.bits());
+}
+
+pub fn video_3d_enabled() -> bool {
+    let control = unsafe { DispCntFlags::from_bits_unchecked(REG_DISPCNT.read_volatile()) };
+    control.contains(DispCntFlags::ENABLE_3D)
+}

@@ -85,6 +85,14 @@ pub enum BgType {
     /// Bitmap background with 16 bit ABGR1555 colors
     Bmp16 = 5,
 }
+impl BgType {
+    pub fn is_text(self) -> bool {
+        matches!(self, Self::Text4 | Self::Text8)
+    }
+    pub fn is_bitmap(self) -> bool {
+        matches!(self, Self::Bmp8 | Self::Bmp16)
+    }
+}
 impl<N: Into<usize>> From<N> for BgType {
     fn from(ty: N) -> Self {
         match ty.into() {
@@ -154,12 +162,24 @@ pub enum BgSize {
     FullBitmapBiggest = ((3 << 14) | bit!(7) | bit!(2) | (4 << 16)),
 }
 
+#[derive(PartialEq, Eq)]
 #[repr(C)]
 pub enum Layer {
     Layer0 = 0,
     Layer1 = 1,
     Layer2 = 2,
     Layer3 = 3,
+}
+impl From<usize> for Layer {
+    fn from(value: usize) -> Self {
+        match value {
+            0 => Self::Layer0,
+            1 => Self::Layer1,
+            2 => Self::Layer2,
+            3 => Self::Layer3,
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -203,7 +223,7 @@ impl TryFrom<usize> for BackgroundId {
             5 => Ok(BackgroundId::SubBg1),
             6 => Ok(BackgroundId::SubBg2),
             7 => Ok(BackgroundId::SubBg3),
-            _ => Err("Tried to convert unknown value to background ID")
+            _ => Err("Tried to convert unknown value to background ID"),
         }
     }
 }
@@ -253,9 +273,29 @@ pub unsafe fn bg_init(
     layer: Layer,
     bg_type: BgType,
     bg_size: BgSize,
-    map_base: usize,
-    tile_base: usize,
+    map_base: u8,
+    tile_base: u8,
 ) -> usize {
+    debug_assert!(tile_base <= 15);
+    debug_assert!(map_base <= 31);
+    if layer == Layer::Layer0 {
+        debug_assert!(
+            crate::video::video_3d_enabled() == false,
+            "Background 0 is currently in use by the 3D engine"
+        );
+    }
+    // For backgrounds 0 and 1,
+    // only Text8bpp and Text4bpp are valid types.
+    if layer == Layer::Layer0 || layer == Layer::Layer1 {
+        debug_assert!(
+            bg_type.is_text(),
+            "Background 0 and 1 can only be Text8 or Text4"
+        );
+    }
+    if bg_type.is_bitmap() {
+        debug_assert_eq!(tile_base, 0, "Tile base is unused for bitmaps");
+    }
+
     bgInit_call(
         layer as i32,
         bg_type as u32,
