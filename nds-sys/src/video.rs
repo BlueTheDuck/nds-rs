@@ -145,9 +145,9 @@ pub enum VideoMode {
 }
 
 /// Sets the video mode for the main engine.
-///
+/// 
 /// # SAFETY
-/// While any mode is valid for the main engine,
+/// While any mode is valid for the main engine, 
 /// changing it on the fly can cause graphical glitches
 /// and may crash the system
 #[inline]
@@ -180,8 +180,7 @@ pub fn enable_main_background(layer: Layer, enable: bool) {
         Layer::Layer2 => DispCntFlags::BG2,
         Layer::Layer3 => DispCntFlags::BG3,
     };
-    let mut current_flags =
-        unsafe { DispCntFlags::from_bits_unchecked(REG_DISPCNT.read_volatile()) };
+    let mut current_flags = unsafe { DispCntFlags::from_bits_unchecked(REG_DISPCNT.read_volatile()) };
     current_flags.set(flag, enable);
     unsafe { REG_DISPCNT.write_volatile(current_flags.bits()) };
 }
