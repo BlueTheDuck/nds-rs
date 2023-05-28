@@ -1,7 +1,7 @@
 extern crate alloc;
 
-use core::alloc::{GlobalAlloc, Layout};
 use crate::debug;
+use core::alloc::{GlobalAlloc, Layout};
 
 type CPtr = *mut core::ffi::c_void;
 extern "C" {

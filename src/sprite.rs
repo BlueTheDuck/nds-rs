@@ -57,4 +57,3 @@ impl Default for Obj {
         return obj;
     }
 }
-

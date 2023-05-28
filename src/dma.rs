@@ -5,7 +5,7 @@
 //! memory sections without using the CPU.
 //! The DMA can only respond to ONE channel at a time, and it will prioratize lower channels first.
 //! In case an operation is being processed, and a new one with a higher priority
-//! is received, the one with the lowest priority will be put on hold and the other will be fulfilled. 
+//! is received, the one with the lowest priority will be put on hold and the other will be fulfilled.
 //! **4 cycles** must be waited after issuing a request before cancelling/overwriting it;
 //! (See the first 4 lines of [`wait_for`]); failing to do so may lead to a lock up (See point 1 below)
 //!
@@ -18,8 +18,8 @@
 //! When developing, one should keep in mind the following things:
 //!  1. There is a delay of 2 cycles after issuing a request (Writing [`Flags::ENABLED`]) and the DMA actually starting.
 //! **Don't touch the channel during that period**, it _will_ lock up.
-//!  2. Toggling OFF the bit [`ENABLED`](Flags::ENABLED) will halt the DMA immediatly. 
-//! This is **not recommended** unless the channel was programmed to [autorepeat](Flags::REPEAT). 
+//!  2. Toggling OFF the bit [`ENABLED`](Flags::ENABLED) will halt the DMA immediatly.
+//! This is **not recommended** unless the channel was programmed to [autorepeat](Flags::REPEAT).
 //! In any case, **wait at least 4 cycles after starting before halting the channel**.
 //!  3. [Wait](wait_for) until the channel has finished before issuing a command, otherwise the current operation will be overwritten
 //! (in the best case, see points 1 and 2 for the worst case).
@@ -29,12 +29,12 @@
 //! take care of this issue by themselves)
 
 use crate::interrupts::swi_intr_wait;
+use core::arch::asm;
 use core::mem::size_of;
 use nds_sys::{
     dma::{calc_cr, calc_registers, Flags},
     interrupts,
 };
-use core::arch::asm;
 
 pub use nds_sys::dma::Channel;
 

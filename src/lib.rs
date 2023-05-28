@@ -17,7 +17,10 @@ macro_rules! bit {
 pub mod background;
 #[macro_use]
 pub mod debug;
+pub mod cache;
 pub mod dma;
+#[cfg(feature = "embedded-graphics-core")]
+pub mod embedded_graphics;
 pub mod input;
 pub mod interrupts;
 mod memalloc;
@@ -25,6 +28,3 @@ mod panic;
 pub mod sprite;
 pub mod system;
 pub mod video;
-#[cfg(feature = "embedded-graphics-core")]
-pub mod embedded_graphics;
-pub mod cache;

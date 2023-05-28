@@ -52,7 +52,7 @@ impl KeyState {
     }
 
     /// Returns `true` if the key state is [`Down`] or [`Held`]
-    /// 
+    ///
     /// [`Down`]: KeyState::Down
     /// [`Held`]: KeyState::Held
     #[must_use]

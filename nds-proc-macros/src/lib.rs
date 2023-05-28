@@ -79,7 +79,7 @@ pub fn entry(_: TokenStream, input: TokenStream) -> TokenStream {
 /// Important notes:
 /// - The function must be `fn() -> !`
 /// - The function must not panic
-/// - If no `panic_screen` is defined, Rust will complain about an undefined 
+/// - If no `panic_screen` is defined, Rust will complain about an undefined
 ///   reference to `__nds_panic_screen`
 ///
 #[proc_macro_attribute]

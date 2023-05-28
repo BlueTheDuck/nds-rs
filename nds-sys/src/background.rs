@@ -86,9 +86,12 @@ pub enum BgType {
     Bmp16 = 5,
 }
 impl BgType {
+    #[inline]
     pub fn is_text(self) -> bool {
         matches!(self, Self::Text4 | Self::Text8)
     }
+
+    #[inline]
     pub fn is_bitmap(self) -> bool {
         matches!(self, Self::Bmp8 | Self::Bmp16)
     }
@@ -107,16 +110,17 @@ impl<N: Into<usize>> From<N> for BgType {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 pub enum BgSize {
     /// 128 x 128 pixel rotation background
-    RotationSmallest = (0 << 14),
+    RotationSmall = (0 << 14),
     /// 256 x 256 pixel rotation background
-    RotationSmall = (1 << 14),
+    RotationMedium = (1 << 14),
     /// 512 x 512 pixel rotation background
     RotationBig = (2 << 14),
     /// 1024 x 1024 pixel rotation background
-    RotationBiggest = (3 << 14),
+    RotationLarge = (3 << 14),
 
     /// 256 x 256 pixel text background
     TextSmall = (0 << 14) | (1 << 16),
@@ -128,19 +132,19 @@ pub enum BgSize {
     TextBig = (3 << 14) | (1 << 16),
 
     /// 128 x 128 pixel extended rotation background
-    ExRotSmallest = (0 << 14) | (2 << 16),
+    ExRotSmall = (0 << 14) | (2 << 16),
     /// 256 x 256 pixel extended rotation background
-    ExRotSmall = (1 << 14) | (2 << 16),
+    ExRotMedium = (1 << 14) | (2 << 16),
     /// 512 x 512 pixel extended rotation background
     ExRotBig = (2 << 14) | (2 << 16),
     /// 1024 x 1024 extended pixel rotation background
-    ExRotBiggest = (3 << 14) | (2 << 16),
+    ExRotLarge = (3 << 14) | (2 << 16),
 
     // 256 color bitmap
     /// 128 x 128 pixel 8 bit bitmap background
-    BitmapSmallest = ((0 << 14) | bit!(7) | (3 << 16)),
+    BitmapSmall = ((0 << 14) | bit!(7) | (3 << 16)),
     /// 256 x 256 pixel 8 bit bitmap background
-    BitmapSmall = ((1 << 14) | bit!(7) | (3 << 16)),
+    BitmapMedium = ((1 << 14) | bit!(7) | (3 << 16)),
     /// 512 x 256 pixel 8 bit bitmap background
     BitmapWide = ((2 << 14) | bit!(7) | (3 << 16)),
     /// 512 x 512 pixel 8 bit bitmap background
@@ -153,16 +157,16 @@ pub enum BgSize {
 
     // Direct color bitmap bg
     /// 128 x 128 pixel 16 bit bitmap background
-    FullBitmapSmallest = ((0 << 14) | bit!(7) | bit!(2) | (4 << 16)),
+    FullBitmapSmall = ((0 << 14) | bit!(7) | bit!(2) | (4 << 16)),
     /// 256 x 256 pixel 16 bit bitmap background
-    FullBitmapSmall = ((1 << 14) | bit!(7) | bit!(2) | (4 << 16)),
+    FullBitmapMedium = ((1 << 14) | bit!(7) | bit!(2) | (4 << 16)),
     /// 512 x 256 pixel 16 bit bitmap background
     FullBitmapWide = ((2 << 14) | bit!(7) | bit!(2) | (4 << 16)),
     /// 512 x 512 pixel 16 bit bitmap background
-    FullBitmapBiggest = ((3 << 14) | bit!(7) | bit!(2) | (4 << 16)),
+    FullBitmapBig = ((3 << 14) | bit!(7) | bit!(2) | (4 << 16)),
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 #[repr(C)]
 pub enum Layer {
     Layer0 = 0,
@@ -284,14 +288,15 @@ pub unsafe fn bg_init(
             "Background 0 is currently in use by the 3D engine"
         );
     }
-    // For backgrounds 0 and 1,
-    // only Text8bpp and Text4bpp are valid types.
+
+    // For backgrounds 0 and 1 only Text8bpp and Text4bpp are valid types.
     if layer == Layer::Layer0 || layer == Layer::Layer1 {
         debug_assert!(
             bg_type.is_text(),
             "Background 0 and 1 can only be Text8 or Text4"
         );
     }
+
     if bg_type.is_bitmap() {
         debug_assert_eq!(tile_base, 0, "Tile base is unused for bitmaps");
     }
