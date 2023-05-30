@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"static":["BLACK","BLUE","GREEN","RED","TRANSPARENT","WHITE"]};

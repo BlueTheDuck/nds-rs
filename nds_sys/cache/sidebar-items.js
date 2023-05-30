@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["DC_FlushAll","DC_FlushRange","DC_InvalidateAll","DC_InvalidateRange","IC_InvalidateAll","IC_InvalidateRange"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["getBatteryLevel","systemShutDown"],"static":["REG_POWERCNT"],"struct":["PowerFlags"]};

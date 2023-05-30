@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["irqDisable","irqEnable","swiIntrWait","swiWaitForVBlank"],"static":["REG_IE","REG_IME"],"struct":["Flags"]};

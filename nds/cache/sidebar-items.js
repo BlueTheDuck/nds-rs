@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["dc_flush_array","dc_flush_slice","dc_invalidate_array","dc_invalidate_slice"]};

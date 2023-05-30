@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["CHARACTER_BASE_OFFSET","SCREEN_BASE_OFFSET","SCREEN_OFFSET_MASK"],"enum":["BackgroundId","BgSize","BgType","Layer"],"fn":["bg_get_gfx_ptr","bg_get_map_base","bg_get_tile_base","bg_init","bg_init_sub"],"mod":["registers"],"struct":["Flags"]};

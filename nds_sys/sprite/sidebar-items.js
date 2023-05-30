@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["COLOR","ID_MASK","X_COORD_MASK","Y_COORD_MASK"],"struct":["Attr0","Attr1"]};

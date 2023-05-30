@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Channel"],"fn":["copy","copy_half_words","copy_within_unchecked","copy_words","fill","fill_half_words","fill_words","is_busy","wait_for"]};

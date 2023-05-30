@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["BitmapLayerSize","Mode","TextLayerSize"],"fn":["background_init"],"struct":["DirectBitmapLayer","TextLayer"]};

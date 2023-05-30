@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Screen"],"fn":["battery","main_engine_on","shutdown"]};

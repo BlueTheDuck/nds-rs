@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["KeypadBits"],"fn":["keysDown","keysHeld","scanKeys","touchRead"],"struct":["TouchPosition"]};
