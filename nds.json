@@ -5,30 +5,17 @@
   "arch": "arm",
   "linker": "arm-none-eabi-gcc",
   "linker-flavor": "gcc",
-  "linker-is-gnu": true,
-  "archive-format": "gnu",
-  "dynamic-linking": false,
-  "target-family": "none",
-  "target-endian": "little",
   "target-pointer-width": "32",
-  "target-c-int-width": "32",
-  "max-atomic-width": 32,
-  "singlethread": true,
   "cpu": "arm946e-s",
-  "exe-suffix": ".elf",
   "os": "none",
-  "executables": true,
   "panic-strategy": "abort",
   "disable-redzone": true,
-  "features": "+strict-align,+soft-float",
+  "features": "+strict-align,+soft-float,+atomics-32",
   "has-thumb-interworking": true,
-  "crt-static-respected": true,
-  "crt-static-default": true,
-  "no-default-libraries": false,
   "env": "newlib",
-  "has-rpath": false,
+  "executables": true,
+  "no-default-libraries": false,
   "is-builtin": false,
-  "position-independent-executables": false,
   "pre-link-args": {
     "gcc": [
       "-v",
@@ -38,11 +25,12 @@
     ]
   },
   "post-link-args": {
-    "gcc": [
-      "-lnds9"
-    ]
   },
+  "main-needs-argc-argv": false,
+  "asm-args": ["-mthumb-interwork", "-march=armv5te", "-mlittle-endian"],
+  "atomic-cas": false,
+  "c-enum-min-bits": 8,
+  "emit-debug-gdb-scripts": false,
   "relocation-model": "static",
-  "relro-level": "none",
-  "vendor": "nintendo"
+  "exe-suffix": ".elf"
 }
