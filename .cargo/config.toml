@@ -1,0 +1,21 @@
+[build]
+target = "armv5te-none-eabi"
+
+[unstable]
+build-std = ["core", "compiler_builtins", "alloc"]
+build-std-features = ["compiler-builtins-mem"]
+
+[target.armv5te-none-eabi]
+runner = "melonDS"
+rustflags = [
+    "--cfg", "portable_atomic_unsafe_assume_single_core",
+    "-Clink-arg=-specs=ds_arm9.specs",
+    
+    # link sysbase and the C library
+    "-Clink-arg=-Wl,--start-group", "-lsysbase", "-lc", "-Wl,--end-group",
+
+    # Some debugging flags
+    "-Clink-arg=-Wl,--start-group", "--trace", "--verbose", "-Map=target/nds.map", "-Wl,--end-group",
+    "--print", "link-args"
+]
+linker = "arm-none-eabi-gcc"
