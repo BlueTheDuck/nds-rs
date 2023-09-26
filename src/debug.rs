@@ -1,9 +1,5 @@
 use core::fmt::{Debug, Write};
-#[cfg(feature = "nocash_tty")]
-use lazy_static::lazy_static;
 use nds_sys::debug::registers;
-#[cfg(feature = "nocash_tty")]
-use spin::Mutex;
 extern crate alloc;
 use core::arch::asm;
 
@@ -35,16 +31,11 @@ pub fn _print(args: core::fmt::Arguments) {
 }
 
 #[cfg(feature = "nocash_tty")]
-lazy_static! {
-    /// Used to access all NO$GBA debugging functions.
-    /// The debugger is detected on startup, and if it is found,
-    /// [`NoCash::is_enabled`] will return `true`.
-    pub static ref NOCASH: Mutex<NoCash> = {
-        let mut nocash = NoCash { found: false };
-        nocash.find_debugger();
-        Mutex::new(nocash)
-    };
-}
+/// Used to access all NO$GBA debugging functions.
+/// The debugger is detected on startup, and if it is found,
+/// [`NoCash::is_enabled`] will return `true`.
+pub static NOCASH: spin::Mutex<once_cell::unsync::Lazy<NoCash>> =
+    spin::Mutex::new(once_cell::unsync::Lazy::new(NoCash::new));
 
 /// Symbolizes the emulator NO$GBA and provides
 /// an API for its debugging capabilities.
