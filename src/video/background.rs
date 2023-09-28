@@ -84,6 +84,8 @@ impl Mode {
             ],
         }
     }
+
+    // pub fn bmp_data(&self) -> Option<&[u16]> {}
 }
 
 /// Initializes the main display engine with the given [`Mode`].

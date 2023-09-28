@@ -1,7 +1,7 @@
 use core::{convert::Infallible, slice::from_raw_parts_mut};
 
 use embedded_graphics_core::{
-    pixelcolor::Rgb555,
+    pixelcolor::Bgr555,
     prelude::{DrawTarget, OriginDimensions, Point, Size},
     Pixel,
 };
@@ -16,7 +16,7 @@ use crate::{
 };
 
 const PIXELS: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as _;
-pub type Framebuffer = [Rgb555; PIXELS];
+pub type Framebuffer = [Bgr555; PIXELS];
 
 pub struct GraphicsTarget<'b> {
     target: &'static mut Framebuffer,
@@ -37,7 +37,7 @@ impl<'b> GraphicsTarget<'b> {
             REG_DISPCNT.write_volatile(CONTROL);
         }
         let target: &'static mut Framebuffer = unsafe {
-            from_raw_parts_mut(nds_sys::video::VRAM_A as *mut Rgb555, PIXELS)
+            from_raw_parts_mut(nds_sys::video::VRAM_A as *mut _, PIXELS)
                 .try_into()
                 .unwrap_unchecked()
         };
@@ -58,7 +58,7 @@ impl OriginDimensions for GraphicsTarget<'_> {
     }
 }
 impl DrawTarget for GraphicsTarget<'_> {
-    type Color = Rgb555;
+    type Color = Bgr555;
 
     type Error = Infallible;
 

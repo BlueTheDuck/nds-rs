@@ -231,6 +231,9 @@ impl TryFrom<usize> for BackgroundId {
         }
     }
 }
+impl core::marker::ConstParamTy for BackgroundId {
+    
+}
 
 pub unsafe fn bg_get_tile_base(id: usize) -> usize {
     let cnt = bgControl[id].read_volatile() >> 2;
