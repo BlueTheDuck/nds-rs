@@ -10,12 +10,14 @@ runner = "melonDS"
 rustflags = [
     "--cfg", "portable_atomic_unsafe_assume_single_core",
     "-Clink-arg=-specs=ds_arm9.specs",
+    "-Ctarget-cpu=arm946e-s",
     
     # link sysbase and the C library
-    "-Clink-arg=-Wl,--start-group", "-lsysbase", "-lc", "-Wl,--end-group",
+    "-Clink-args=-Wl,--start-group -lsysbase -lc -Wl,--end-group",
 
     # Some debugging flags
-    "-Clink-arg=-Wl,--start-group", "--trace", "--verbose", "-Map=target/nds.map", "-Wl,--end-group",
-    "--print", "link-args"
+    "-Clink-arg=-Wl,-Map=target/nds.map",
+    # "-Clink-arg=-Wl,--verbose",
+    # "--print", "link-args"
 ]
 linker = "arm-none-eabi-gcc"
