@@ -28,30 +28,75 @@ bitflags! {
 
         const INT_REQ = 0b0_1_000_0_0_00_00_000000000000000000000;
 
-        const START_IMM = 0b0_0_000_0_0_00_00_000000000000000000000;
-        const START_AT_VBLANK = 0b0_0_001_0_0_00_00_000000000000000000000;
-        const START_AT_HBLANK = 0b0_0_010_0_0_00_00_000000000000000000000;
+        const START_IMM         = 0b0_0_000_0_0_00_00_000000000000000000000;
+        const START_AT_VBLANK   = 0b0_0_001_0_0_00_00_000000000000000000000;
+        const START_AT_HBLANK   = 0b0_0_010_0_0_00_00_000000000000000000000;
         const SYNC_WITH_DISPLAY = 0b0_0_011_0_0_00_00_000000000000000000000;
-        const MAIN_MEM = 0b0_0_100_0_0_00_00_000000000000000000000;
-        const GAMECARD = 0b0_0_101_0_0_00_00_000000000000000000000;
-        const DS_ACCS = 0b0_0_110_0_0_00_00_000000000000000000000;
-        const GEO_CMD_FIFO = 0b0_0_111_0_0_00_00_000000000000000000000;
+        const MAIN_MEM          = 0b0_0_100_0_0_00_00_000000000000000000000;
+        const GAMECARD          = 0b0_0_101_0_0_00_00_000000000000000000000;
+        const DS_ACCS           = 0b0_0_110_0_0_00_00_000000000000000000000;
+        const GEO_CMD_FIFO      = 0b0_0_111_0_0_00_00_000000000000000000000;
+        const START_MASK        = 0b0_0_111_0_0_00_00_000000000000000000000;
 
-        const WORDS = 0b0_0_000_1_0_00_00_000000000000000000000;
+        const WORDS     = 0b0_0_000_1_0_00_00_000000000000000000000;
         const HALFWORDS = 0b0_0_000_0_0_00_00_000000000000000000000;
 
         const REPEAT = 0b0_0_000_0_1_00_00_000000000000000000000;
 
-        const INC_SRC = 0b0_0_000_0_0_00_00_000000000000000000000;
-        const DEC_SRC = 0b0_0_000_0_0_01_00_000000000000000000000;
-        const FIX_SRC = 0b0_0_000_0_0_10_00_000000000000000000000;
+        const INC_SRC  = 0b0_0_000_0_0_00_00_000000000000000000000;
+        const DEC_SRC  = 0b0_0_000_0_0_01_00_000000000000000000000;
+        const FIX_SRC  = 0b0_0_000_0_0_10_00_000000000000000000000;
+        const SRC_MASK = 0b0_0_000_0_0_11_00_000000000000000000000;
 
-        const INC_DST = 0b0_0_000_0_0_00_00_000000000000000000000;
-        const DEC_DST = 0b0_0_000_0_0_00_01_000000000000000000000;
-        const FIX_DST = 0b0_0_000_0_0_00_10_000000000000000000000;
+        const INC_DST     = 0b0_0_000_0_0_00_00_000000000000000000000;
+        const DEC_DST     = 0b0_0_000_0_0_00_01_000000000000000000000;
+        const FIX_DST     = 0b0_0_000_0_0_00_10_000000000000000000000;
+        /// Increment reload
         const INC_REL_DST = 0b0_0_000_0_0_00_11_000000000000000000000;
+        const DST_MASK    = 0b0_0_000_0_0_00_11_000000000000000000000;
 
         const LEN_MASK = 0b111111111111111111111;
+    }
+}
+impl core::fmt::Display for Flags {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let enabled = self.contains(Flags::ENABLED);
+        let int_req = self.contains(Flags::INT_REQ);
+        let start_mode = match *self & Flags::START_MASK {
+            Flags::START_IMM => "Immediate",
+            Flags::START_AT_VBLANK => "At VBlank",
+            Flags::START_AT_HBLANK => "At HBlank",
+            Flags::SYNC_WITH_DISPLAY => "Sync with display",
+            _ => unreachable!(),
+        };
+        let size = if self
+            .contains(Flags::WORDS) { "Words" } else { "Halfwords" };
+        let repeat = self.contains(Flags::REPEAT);
+        let src_mode = match *self & Flags::SRC_MASK {
+            Flags::INC_SRC => "Increment",
+            Flags::DEC_SRC => "Decrement",
+            Flags::FIX_SRC => "Fixed",
+            _ => unreachable!(),
+        };
+        let dst_mode = match *self & Flags::DST_MASK {
+            Flags::INC_DST => "Increment",
+            Flags::DEC_DST => "Decrement",
+            Flags::FIX_DST => "Fixed",
+            Flags::INC_REL_DST => "Increment reload",
+            _ => unreachable!(),
+        };
+        let len = self.bits & Flags::LEN_MASK.bits;
+
+        f.debug_struct("DmaFlags")
+            .field("enabled", &enabled)
+            .field("IRQ", &int_req)
+            .field("start", &start_mode)
+            .field("size", &size)
+            .field("repeat", &repeat)
+            .field("source", &src_mode)
+            .field("destination", &dst_mode)
+            .field("len", &len)
+            .finish()
     }
 }
 

@@ -7,6 +7,7 @@ pub mod registers {
 
 /// Waits until the next VBlank.
 /// (Same as [`swi_intr_wait(Flags::VBLANK, true)`](swi_intr_wait).
+#[inline(always)]
 pub fn swi_wait_for_v_blank() {
     unsafe {
         swiWaitForVBlank();

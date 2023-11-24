@@ -1,3 +1,6 @@
+#![allow(clippy::identity_op)]
+// Allow this ^ because this file is a translation of C code,
+
 use crate::{
     bindings::{bgControl, bgInitSub_call, bgInit_call},
     video::{BG_GFX, BG_GFX_SUB},
@@ -200,12 +203,12 @@ pub enum BackgroundId {
 }
 impl BackgroundId {
     pub const fn is_main(&self) -> bool {
-        match self {
-            Self::MainBg0 | Self::MainBg1 | Self::MainBg2 | Self::MainBg3 => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            Self::MainBg0 | Self::MainBg1 | Self::MainBg2 | Self::MainBg3
+        )
     }
-    pub fn get_layer(self) -> Layer {
+    pub const fn get_layer(self) -> Layer {
         match self {
             BackgroundId::MainBg0 | BackgroundId::SubBg0 => Layer::Layer0,
             BackgroundId::MainBg1 | BackgroundId::SubBg1 => Layer::Layer1,
@@ -231,31 +234,44 @@ impl TryFrom<usize> for BackgroundId {
         }
     }
 }
-impl core::marker::ConstParamTy for BackgroundId {
-    
-}
+impl core::marker::ConstParamTy for BackgroundId {}
 
+/// Returns the base address of the tile data for the given background.
+/// This value is garbage for bitmap backgrounds.
+///
+/// # Safety
+/// `id` must be 0, 1, 2, 3 for main engine backgrounds, or 4, 5, 6, 7 for sub engine backgrounds.
 pub unsafe fn bg_get_tile_base(id: usize) -> usize {
     let cnt = bgControl[id].read_volatile() >> 2;
-    return (cnt & 15) as usize;
+    (cnt & 15) as _
 }
 
+/// Returns the base address of the map data for the given background.
+/// For bitmap backgrounds, this value is the base address of the bitmap data.
+///
+/// # Safety
+/// `id` must be 0, 1, 2, 3 for main engine backgrounds, or 4, 5, 6, 7 for sub engine backgrounds.
 pub unsafe fn bg_get_map_base(id: usize) -> usize {
     let cnt = bgControl[id].read_volatile() >> 8;
-    return (cnt & 0xFF) as usize;
+    (cnt & 0xFF) as usize
 }
 
+/// # Safety
+/// `id` must be 0, 1, 2, 3 for main engine backgrounds, or 4, 5, 6, 7 for sub engine backgrounds.
+/// Unimplemented and untested for many cases.
 pub unsafe fn bg_get_gfx_ptr(id: usize) -> *mut u16 {
     use super::bindings::bgState;
     match bgState[id].type_ {
+        // Text8, Text4, Rotation, ExRotation
         0 | 1 | 2 | 3 => {
             if id < 4 {
-                BG_GFX.add(bg_get_tile_base(id) * 0x4000) as *mut u16
+                BG_GFX.add(bg_get_tile_base(id) * 0x4000)
             } else {
                 //((u16*)BG_TILE_RAM_SUB(bgGetTileBase(id)))
-                unimplemented!("Graphics for SUB are not yet implemented")
+                todo!("Graphics for SUB are not yet implemented")
             }
         }
+        // Bmp8, Bmp16
         4 | 5 => {
             if id < 4 {
                 BG_GFX.add(0x2000 * bg_get_map_base(id))
@@ -287,7 +303,7 @@ pub unsafe fn bg_init(
     debug_assert!(map_base <= 31);
     if layer == Layer::Layer0 {
         debug_assert!(
-            crate::video::video_3d_enabled() == false,
+            !crate::video::video_3d_enabled(),
             "Background 0 is currently in use by the 3D engine"
         );
     }

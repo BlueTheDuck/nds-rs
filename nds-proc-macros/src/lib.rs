@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use quote::{__private::ext::RepToTokensExt, quote};
+use quote::quote;
 use syn::{parse_macro_input, ItemFn};
 
 /// Use it to mark the ROM entry point.

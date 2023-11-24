@@ -39,6 +39,7 @@ macro_rules! bank {
 
             impl Mode {
                 /// Sets the specified mode on this bank while also enabling it
+                #[inline]
                 pub fn set(self) {
                     unsafe {
                         VRAM_CR.write_volatile($crate::sys::video::VRAM_ENABLE | (self as u8));
@@ -47,6 +48,7 @@ macro_rules! bank {
             }
 
             /// Disable this bank without changing its configuration
+            #[inline]
             pub unsafe fn disable() {
                 let flags = VRAM_CR.read_volatile() & !$crate::sys::video::VRAM_ENABLE;
                 VRAM_CR.write_volatile(flags);

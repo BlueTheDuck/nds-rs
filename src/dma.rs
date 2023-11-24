@@ -57,6 +57,12 @@ pub fn is_busy(ch: Channel) -> bool {
 /// [`DMA2`](interrupts::Flags::DMA2) and [`DMA3`](interrupts::Flags::DMA3) are enabled ([`irq_enable`](crate::interrupts::irq_enable)).
 /// On debug builds, this function panics if the required interrupt is not enabled, but on release this may hang for ever
 pub fn wait_for(ch: Channel) {
+    unsafe {
+        asm!("nop");
+        asm!("nop");
+        asm!("nop");
+        asm!("nop");
+    }
     if !is_busy(ch) {
         return;
     }
@@ -166,7 +172,8 @@ where
 {
     wait_for(Channel::Ch3);
     let (src_cr, dst_cr, cr, _) = calc_registers(Channel::Ch3);
-    let mut flags: Flags = Flags::ENABLE;
+    let mut flags: Flags =
+        Flags::ENABLE | Flags::START_IMM | Flags::INC_SRC | Flags::INC_DST | Flags::INT_REQ;
     match size_of::<T>() {
         4 => {
             flags |= Flags::WORDS;
@@ -178,7 +185,9 @@ where
             panic!("Can only run copy<T>() if T is either 2 or 4 bytes");
         }
     }
-    let flags: u32 = flags.bits() | core::cmp::min(src.len(), dst.len()) as u32;
+    let len = src.len().min(dst.len()) as u32;
+    let flags: u32 = flags.bits() | len;
+    
     unsafe {
         src_cr.write_volatile(src.as_ptr() as *const usize);
         dst_cr.write_volatile(dst.as_mut_ptr() as *mut usize);

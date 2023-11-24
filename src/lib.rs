@@ -23,3 +23,11 @@ mod panic;
 pub mod sprite;
 pub mod system;
 pub mod video;
+
+#[doc(hidden)]
+mod private {
+    /// This trait is sealed and cannot be implemented outside of this crate.
+    /// It is used to prevent users from implementing special traits for marker
+    /// traits and types.
+    pub trait Sealed {}
+}

@@ -146,7 +146,7 @@ pub enum VideoMode {
 
 /// Sets the video mode for the main engine.
 ///
-/// # SAFETY
+/// # Safety
 /// While any mode is valid for the main engine,
 /// changing it on the fly can cause graphical glitches
 /// and may crash the system
@@ -158,7 +158,7 @@ pub unsafe fn set_video_mode(flags: VideoMode) {
 /// Sets the video mode for the sub engine.
 /// Mode 6 and 3D are invalid for the sub engine.
 ///
-/// # SAFETY
+/// # Safety
 ///  - The sub engine can't use any mode that uses 3D
 ///  - Only modes 0-5 can be used for the sub engine
 ///  - changing it on the fly can cause graphical glitches and may crash the system
