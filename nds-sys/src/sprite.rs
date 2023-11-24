@@ -1,6 +1,7 @@
 use bitflags::bitflags;
 
 bitflags! {
+    #[derive(Copy, Clone)]
     pub struct Attr0: u16 {
         const SHAPE_SQUARE = 0b00_000000_00000000;
         const SHAPE_WIDE = 0b01_000000_00000000;
@@ -26,6 +27,7 @@ bitflags! {
     }
 }
 bitflags! {
+    #[derive(Copy, Clone)]
     pub struct Attr1: u16 {
         /// Small axis: 8 pixels / Large axis: 16 pixels. Square: 8 pixels
         const SIZE_SMALL = 0b00_000000_00000000;

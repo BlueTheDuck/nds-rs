@@ -9,6 +9,7 @@ pub static mut REG_IE: *mut u32 = 0x04000210 as *mut _;
 pub static mut REG_IME: *mut u32 = 0x04000208 as *mut _;
 
 bitflags! {
+    #[derive(PartialEq, Eq, Copy, Clone)]
     pub struct Flags: u32 {
         const VBLANK = bit!(0);
         const HBLANK = bit!(1);

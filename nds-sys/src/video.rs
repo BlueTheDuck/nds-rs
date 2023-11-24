@@ -169,7 +169,7 @@ pub unsafe fn set_video_mode_sub(flags: VideoMode) {
 
 #[inline]
 pub fn video_3d_enabled() -> bool {
-    let control = unsafe { DispCntFlags::from_bits_unchecked(REG_DISPCNT.read_volatile()) };
+    let control = DispCntFlags::from_bits_retain(unsafe { REG_DISPCNT.read_volatile() });
     control.contains(DispCntFlags::ENABLE_3D)
 }
 
@@ -180,8 +180,7 @@ pub fn enable_main_background(layer: Layer, enable: bool) {
         Layer::Layer2 => DispCntFlags::BG2,
         Layer::Layer3 => DispCntFlags::BG3,
     };
-    let mut current_flags =
-        unsafe { DispCntFlags::from_bits_unchecked(REG_DISPCNT.read_volatile()) };
+    let mut current_flags = DispCntFlags::from_bits_retain(unsafe { REG_DISPCNT.read_volatile() });
     current_flags.set(flag, enable);
     unsafe { REG_DISPCNT.write_volatile(current_flags.bits()) };
 }

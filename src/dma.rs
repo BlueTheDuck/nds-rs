@@ -47,7 +47,7 @@ pub fn is_busy(ch: Channel) -> bool {
         asm!("nop");
     }
     let cr = calc_cr(ch);
-    let flags = unsafe { Flags::from_bits_unchecked(cr.read_volatile()) };
+    let flags = Flags::from_bits_retain(unsafe { cr.read_volatile() });
     (flags & Flags::ENABLED).bits() != 0
 }
 

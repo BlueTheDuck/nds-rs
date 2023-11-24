@@ -34,12 +34,12 @@ impl Obj {
     pub fn set_x(&mut self, x: u16) {
         debug_assert!(x <= sprite::X_COORD_MASK, "x coord out of range");
         let bits = self.attr1.bits() & !sprite::X_COORD_MASK;
-        self.attr1 = unsafe { sprite::Attr1::from_bits_unchecked(bits | x) };
+        self.attr1 = sprite::Attr1::from_bits_retain(bits | x);
     }
     pub fn set_y(&mut self, y: u16) {
         debug_assert!(y <= sprite::Y_COORD_MASK, "y coord out of range");
         let bits = self.attr0.bits() & !sprite::Y_COORD_MASK;
-        self.attr0 = unsafe { sprite::Attr0::from_bits_unchecked(bits | y) };
+        self.attr0 = sprite::Attr0::from_bits_retain(bits | y);
     }
     pub fn hide(&mut self) {
         self.attr0.remove(sprite::Attr0::AFFINE_ENABLE);

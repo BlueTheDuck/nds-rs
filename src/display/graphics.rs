@@ -110,22 +110,14 @@ pub trait GraphicsMode {
 pub struct Mode5;
 
 impl GraphicsMode for Mode5 {
-    const MODE: DispCntFlags = unsafe {
-        DispCntFlags::from_bits_unchecked(
-            // TODO: Update bitflags crate
-            DispCntFlags::MODE5.bits() | DispCntFlags::DISPLAY_GRAPHICS.bits(),
-        )
-    };
+    const MODE: DispCntFlags =
+        DispCntFlags::union(DispCntFlags::MODE5, DispCntFlags::DISPLAY_GRAPHICS);
 }
 
 pub struct VramA;
 impl GraphicsMode for VramA {
-    const MODE: DispCntFlags = unsafe {
-        DispCntFlags::from_bits_unchecked(
-            // TODO: Update bitflags crate
-            DispCntFlags::VRAM_A.bits() | DispCntFlags::DISPLAY_VRAM.bits(),
-        )
-    };
+    const MODE: DispCntFlags =
+        DispCntFlags::union(DispCntFlags::VRAM_A, DispCntFlags::DISPLAY_VRAM);
 }
 
 pub struct Layer0(());

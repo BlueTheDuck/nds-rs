@@ -22,6 +22,7 @@ const CH2_FILL: *mut u32 = 0x040000E8 as *mut u32;
 const CH3_FILL: *mut u32 = 0x040000EC as *mut u32;
 
 bitflags! {
+    #[derive(PartialEq, Eq, Copy, Clone)]
     pub struct Flags: u32 {
         const ENABLED = 0b1_0_000_0_0_00_00_000000000000000000000;
         const ENABLE = 0b1_0_000_0_0_00_00_000000000000000000000;
@@ -85,7 +86,7 @@ impl core::fmt::Display for Flags {
             Flags::INC_REL_DST => "Increment reload",
             _ => unreachable!(),
         };
-        let len = self.bits & Flags::LEN_MASK.bits;
+        let len = self.bits() & Flags::LEN_MASK.bits();
 
         f.debug_struct("DmaFlags")
             .field("enabled", &enabled)
