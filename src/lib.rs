@@ -35,4 +35,8 @@ mod private {
     pub trait Sealed {}
 
     impl<'g, L> Sealed for crate::display::backgrounds::DirectBitmapLayer<'g, L> {}
+    impl Sealed for crate::display::graphics::Layer0 {}
+    impl Sealed for crate::display::graphics::Layer1 {}
+    impl Sealed for crate::display::graphics::Layer2 {}
+    impl Sealed for crate::display::graphics::Layer3 {}
 }

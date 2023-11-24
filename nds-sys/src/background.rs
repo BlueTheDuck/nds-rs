@@ -2,9 +2,29 @@
 // Allow this ^ because this file is a translation of C code,
 
 use crate::{
-    bindings::{bgControl, bgInitSub_call, bgInit_call},
+    bindings::{bgControl, bgInit_call},
     video::{BG_GFX, BG_GFX_SUB},
 };
+
+/// libnds' internal representation of a background.
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct BgState {
+    angle: core::ffi::c_int,
+    center_x: i32,
+    center_y: i32,
+    scale_x: i32,
+    scale_y: i32,
+    scroll_x: i32,
+    scroll_y: i32,
+    size: BgSize,
+    r#type: BgType,
+    dirty: bool,
+}
+
+extern "C" {
+    pub static mut bgState: [BgState; 8usize];
+}
 
 pub mod registers {
     /// Control register for background 0 of Main Engine
@@ -260,10 +280,9 @@ pub unsafe fn bg_get_map_base(id: usize) -> usize {
 /// `id` must be 0, 1, 2, 3 for main engine backgrounds, or 4, 5, 6, 7 for sub engine backgrounds.
 /// Unimplemented and untested for many cases.
 pub unsafe fn bg_get_gfx_ptr(id: usize) -> *mut u16 {
-    use super::bindings::bgState;
-    match bgState[id].type_ {
+    match bgState[id].r#type {
         // Text8, Text4, Rotation, ExRotation
-        0 | 1 | 2 | 3 => {
+        t if t.is_text() => {
             if id < 4 {
                 BG_GFX.add(bg_get_tile_base(id) * 0x4000)
             } else {
@@ -272,7 +291,7 @@ pub unsafe fn bg_get_gfx_ptr(id: usize) -> *mut u16 {
             }
         }
         // Bmp8, Bmp16
-        4 | 5 => {
+        t if t.is_bitmap() => {
             if id < 4 {
                 BG_GFX.add(0x2000 * bg_get_map_base(id))
             } else {
@@ -317,7 +336,7 @@ pub unsafe fn bg_init(
     }
 
     if bg_type.is_bitmap() {
-        debug_assert_eq!(tile_base, 0, "Tile base is unused for bitmaps");
+        debug_assert_eq!(tile_base, 0, "Tile base is unused for bitmaps. Please set it to 0");
     }
 
     bgInit_call(
@@ -329,6 +348,8 @@ pub unsafe fn bg_init(
     ) as usize
 }
 
+#[doc(hidden)]
+#[allow(warnings)]
 pub unsafe fn bg_init_sub(
     layer: Layer,
     bg_type: BgType,
@@ -336,11 +357,12 @@ pub unsafe fn bg_init_sub(
     map_base: usize,
     tile_base: usize,
 ) -> usize {
-    bgInitSub_call(
+    todo!("porting bgInitSub from C to Rust hasn't been done yet")
+    /* bgInitSub_call(
         layer as i32,
         bg_type as u32,
         bg_size as u32,
         map_base as i32,
         tile_base as i32,
-    ) as usize
+    ) as usize */
 }

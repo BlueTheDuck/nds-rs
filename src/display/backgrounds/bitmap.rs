@@ -76,7 +76,7 @@ impl<'g> IntoRegisterValue for DirectBitmapLayer<'g, Layer2> {
 
     const REGISTER: *mut Self::SIZE = nds_sys::background::registers::BG2CNT;
 
-    fn into_value(&self) -> Self::SIZE {
+    fn as_value(&self) -> Self::SIZE {
         const TILE_BASE_BLOCK: u16 = 0b00000000_00000100;
         const COLOR_MODE: u16 = 0b00000000_10000000;
 
@@ -94,7 +94,7 @@ impl<'g> IntoRegisterValue for DirectBitmapLayer<'g, Layer3> {
 
     const REGISTER: *mut Self::SIZE = nds_sys::background::registers::BG3CNT;
 
-    fn into_value(&self) -> Self::SIZE {
+    fn as_value(&self) -> Self::SIZE {
         const TILE_BASE_BLOCK: u16 = 0b00000000_00000100;
         const COLOR_MODE: u16 = 0b00000000_10000000;
 

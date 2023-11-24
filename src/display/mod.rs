@@ -6,7 +6,7 @@ pub mod graphics;
 /// Represent and controls access to the video hardware.
 ///
 /// Having a mutable reference to this type allows you change the video settings.
-/// 
+///
 /// Check [`Hw`](crate::Hw) to learn how to get an object of this type.
 ///
 /// # Example
@@ -33,11 +33,16 @@ pub trait IntoRegisterValue {
     type SIZE;
     const REGISTER: *mut Self::SIZE;
 
-    fn into_value(&self) -> Self::SIZE;
+    fn as_value(&self) -> Self::SIZE;
 
+    /// Commit the changes to the hardware.
+    ///
+    /// # Safety
+    /// Check the documentation of the register you are writing to,
+    /// or hardware that may be affected by the change.
     #[inline]
     unsafe fn commit(&self) {
-        Self::REGISTER.write_volatile(self.into_value());
+        Self::REGISTER.write_volatile(self.as_value());
     }
 }
 

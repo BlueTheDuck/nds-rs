@@ -70,8 +70,11 @@ impl core::fmt::Display for Flags {
             Flags::SYNC_WITH_DISPLAY => "Sync with display",
             _ => unreachable!(),
         };
-        let size = if self
-            .contains(Flags::WORDS) { "Words" } else { "Halfwords" };
+        let size = if self.contains(Flags::WORDS) {
+            "Words"
+        } else {
+            "Halfwords"
+        };
         let repeat = self.contains(Flags::REPEAT);
         let src_mode = match *self & Flags::SRC_MASK {
             Flags::INC_SRC => "Increment",

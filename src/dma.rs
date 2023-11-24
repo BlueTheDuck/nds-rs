@@ -187,7 +187,7 @@ where
     }
     let len = src.len().min(dst.len()) as u32;
     let flags: u32 = flags.bits() | len;
-    
+
     unsafe {
         src_cr.write_volatile(src.as_ptr() as *const usize);
         dst_cr.write_volatile(dst.as_mut_ptr() as *mut usize);

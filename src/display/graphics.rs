@@ -17,7 +17,7 @@ impl<'v, M: GraphicsMode> IntoRegisterValue for Graphics<'v, M> {
 
     const REGISTER: *mut Self::SIZE = nds_sys::video::REG_DISPCNT;
 
-    fn into_value(&self) -> Self::SIZE {
+    fn as_value(&self) -> Self::SIZE {
         let (v0, v1, v2, v3) = self.bgs_displayed.get();
         let bgs_displayed = v0
             .then_some(DispCntFlags::BG0)
@@ -71,19 +71,11 @@ impl Graphics<'_, Mode5> {
         DispCntFlags::MODE5
     }
 
-    pub fn new_layer_2<'g>(
-        &'g self,
-        block: u8,
-        size: DirectBitmapSize,
-    ) -> DirectBitmapLayer<'g, Layer2> {
+    pub fn new_layer_2(&self, block: u8, size: DirectBitmapSize) -> DirectBitmapLayer<'_, Layer2> {
         DirectBitmapLayer::new(block, size)
     }
 
-    pub fn new_layer_3<'g>(
-        &'g self,
-        block: u8,
-        size: DirectBitmapSize,
-    ) -> DirectBitmapLayer<'g, Layer3> {
+    pub fn new_layer_3(&self, block: u8, size: DirectBitmapSize) -> DirectBitmapLayer<'_, Layer3> {
         DirectBitmapLayer::new(block, size)
     }
 }
@@ -93,12 +85,15 @@ impl<'g> Graphics<'g, VramA> {
         VramA::MODE
     }
 
-    pub fn framebuffer(&self) -> &'g mut [u16] {
+    // TODO: This is unsafe
+    pub fn framebuffer(&self) -> &'g mut [u16; (SCREEN_WIDTH * SCREEN_HEIGHT) as _] {
         unsafe {
             core::slice::from_raw_parts_mut(
                 nds_sys::video::VRAM_A as *mut _,
                 (SCREEN_WIDTH * SCREEN_HEIGHT) as _,
             )
+            .try_into()
+            .unwrap_unchecked()
         }
     }
 }
@@ -140,6 +135,6 @@ impl LayerMarker for Layer3 {
     const LAYER_INDEX: usize = 3;
 }
 
-pub(crate) trait LayerMarker {
+pub trait LayerMarker: crate::private::Sealed {
     const LAYER_INDEX: usize;
 }
