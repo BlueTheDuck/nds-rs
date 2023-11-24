@@ -20,9 +20,12 @@ pub mod interrupts;
 pub mod macros;
 mod memalloc;
 mod panic;
+mod peripherals;
 pub mod sprite;
 pub mod system;
 pub mod video;
+pub use peripherals::Hw;
+pub mod display;
 
 #[doc(hidden)]
 mod private {
@@ -30,4 +33,6 @@ mod private {
     /// It is used to prevent users from implementing special traits for marker
     /// traits and types.
     pub trait Sealed {}
+
+    impl<'g, L> Sealed for crate::display::backgrounds::DirectBitmapLayer<'g, L> {}
 }

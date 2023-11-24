@@ -12,7 +12,7 @@ use syn::{parse_macro_input, ItemFn};
 /// extern crate nds:
 ///
 /// #[entry]
-/// fn main() -> ! {
+/// fn main(mut hw: nds::Hw) -> ! {
 ///     loop {
 ///         nds::interrupts::swi_wait_for_v_blank();
 ///     }
@@ -22,12 +22,13 @@ use syn::{parse_macro_input, ItemFn};
 pub fn entry(_: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemFn);
     let name = input.sig.ident.clone();
-    
+
     quote! {
         #[no_mangle]
         pub extern "C" fn main() -> ! {
             #input
-            let ret = #name();
+            let peripherals = nds::Hw::take().unwrap();
+            let ret = #name(peripherals);
             panic!("main() returned {:?}",ret);
         }
     }
