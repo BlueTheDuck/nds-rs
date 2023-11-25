@@ -7,7 +7,7 @@ use super::{
 };
 
 /// A struct that represents the graphics hardware, either the main engine or the sub engine.
-/// Having a mut ref allows you to control the graphics hardware.
+/// Having a mut ref allows you to control one of the engines.
 ///
 /// See [`crate::Hw::take_video`] for information on how to get an instance of this struct.
 ///
@@ -36,21 +36,19 @@ impl<'v, M: GraphicsMode> IntoRegisterValue for Graphics<'v, M> {
 
     fn as_value(&self) -> Self::SIZE {
         let (v0, v1, v2, v3) = self.bgs_displayed.get();
-        let bgs_displayed = v0
-            .then_some(DispCntFlags::BG0)
-            .unwrap_or(DispCntFlags::empty())
-            | v1.then_some(DispCntFlags::BG1)
-                .unwrap_or(DispCntFlags::empty())
-            | v2.then_some(DispCntFlags::BG2)
-                .unwrap_or(DispCntFlags::empty())
-            | v3.then_some(DispCntFlags::BG3)
-                .unwrap_or(DispCntFlags::empty());
+        let mut bgs_displayed = DispCntFlags::empty();
+        bgs_displayed.set(DispCntFlags::BG0, v0);
+        bgs_displayed.set(DispCntFlags::BG1, v1);
+        bgs_displayed.set(DispCntFlags::BG2, v2);
+        bgs_displayed.set(DispCntFlags::BG3, v3);
         (M::MODE | bgs_displayed).bits()
     }
 }
 
+/// Generic methods that are available in all modes, such as hiding/showing backgrounds.
+///
 impl<'v, M> Graphics<'v, M> {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             _mode: PhantomData::<M>,
             _video: PhantomData::<&'v ()>,
@@ -58,6 +56,7 @@ impl<'v, M> Graphics<'v, M> {
         }
     }
 
+    // TODO: Use enum, not u8
     pub fn hide_background(&self, bg: u8) {
         let (v0, v1, v2, v3) = self.bgs_displayed.get();
         let new = match bg {
@@ -70,6 +69,7 @@ impl<'v, M> Graphics<'v, M> {
         self.bgs_displayed.set(new);
     }
 
+    // TODO: Use enum, not u8
     pub fn show_background(&self, bg: u8) {
         let (v0, v1, v2, v3) = self.bgs_displayed.get();
         let new = match bg {
@@ -83,6 +83,8 @@ impl<'v, M> Graphics<'v, M> {
     }
 }
 
+/// This specialization has methods that are only available in mode 5,
+/// such as constructing bitmap layers.
 impl Graphics<'_, Mode5> {
     pub fn mode() -> DispCntFlags {
         DispCntFlags::MODE5
@@ -97,6 +99,8 @@ impl Graphics<'_, Mode5> {
     }
 }
 
+/// This specialization has methods that are only available when rendering directly from VRAM,
+/// in particular the Bank A, such as getting the framebuffer.
 impl<'g> Graphics<'g, VramA> {
     pub fn mode() -> DispCntFlags {
         VramA::MODE
@@ -115,7 +119,9 @@ impl<'g> Graphics<'g, VramA> {
     }
 }
 
-pub trait GraphicsMode: crate::private::Sealed {
+/// Marker trait that limits which modes can be used with [`Graphics`].
+#[doc(hidden)]
+pub trait GraphicsMode : crate::private::Sealed {
     #[doc(hidden)]
     const MODE: DispCntFlags;
 }

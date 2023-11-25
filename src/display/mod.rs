@@ -23,10 +23,10 @@ pub use layers::*;
 /// ```
 pub struct Video {}
 impl Video {
-    pub fn new_graphics<'v, M: GraphicsMode>(&'v mut self) -> Graphics<'v, M> {
+    pub fn new_graphics<M: GraphicsMode>(&mut self) -> Graphics<'_, M> {
         Graphics::new()
     }
-    pub fn new_vram(&mut self) -> () {
+    pub fn new_vram(&mut self) -> ! {
         todo!("new_vram")
     }
 }
@@ -48,8 +48,13 @@ pub trait IntoRegisterValue {
     }
 }
 
+// TODO: Move this to a more appropriate place
+// TODO: This is a barebones implementation, it should be improved
 #[repr(C)]
 #[derive(Clone, Copy)]
+/// Represents an affine transformation.
+/// Currently only the identity transformation is supported.
+/// Use it with backgrounds that have the [`AffineBackgroundMarker`] trait.
 pub struct AffineTransform {
     rot_scale: [u16; 4],
     disp: [u32; 2],

@@ -6,14 +6,24 @@ use crate::display::Video;
 pub static __HW: Mutex<Option<Hw>> = Mutex::new(Some(Hw::new()));
 
 /// Represents the hardware of the console.
-/// 
+///
 /// Having a mutable reference to this type allows you get access to the hardware,
 /// such as the [`Video`](crate::display::Video).
-/// 
+///
 /// The only way to get an object of this type is to call [`take`](Hw::take),
 /// which will return `None` if the hardware is already taken.
 /// If using the [`entry`](crate::entry) attribute, the hardware will be taken
 /// automatically, and passed to the entry point.
+///
+/// # Example
+/// ```rust,no_run
+/// #[entry]
+/// fn main(mut hw: nds::Hw) -> ! {
+///   let mut video = hw.take_video().unwrap();
+///   /* draw to the screen */
+/// }
+/// ```
+///
 pub struct Hw {
     video: bool,
     _unused: (),
