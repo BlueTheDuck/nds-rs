@@ -336,7 +336,10 @@ pub unsafe fn bg_init(
     }
 
     if bg_type.is_bitmap() {
-        debug_assert_eq!(tile_base, 0, "Tile base is unused for bitmaps. Please set it to 0");
+        debug_assert_eq!(
+            tile_base, 0,
+            "Tile base is unused for bitmaps. Please set it to 0"
+        );
     }
 
     bgInit_call(

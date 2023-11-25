@@ -48,14 +48,14 @@ macro_rules! bank {
             }
 
             /// Disable this bank without changing its configuration
-            /// 
+            ///
             /// # Safety
-            /// 
+            ///
             /// Banks are extra RAM that you can map to different parts of the system.
             /// (in particular, the GPU). If you disable a bank that is currently being used
             /// you might get unexpected results. Rust's destructor will not be called on
             /// any data that might be on the bank, and pointers/borrows to that data will
-            /// be invalid. 
+            /// be invalid.
             #[inline]
             pub unsafe fn disable() {
                 let flags = VRAM_CR.read_volatile() & !$crate::sys::video::VRAM_ENABLE;

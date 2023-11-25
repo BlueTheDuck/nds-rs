@@ -3,9 +3,26 @@ use nds_sys::video::{DispCntFlags, SCREEN_HEIGHT, SCREEN_WIDTH};
 
 use super::{
     backgrounds::{DirectBitmapLayer, DirectBitmapSize},
-    IntoRegisterValue,
+    IntoRegisterValue, Layer2, Layer3,
 };
 
+/// A struct that represents the graphics hardware, either the main engine or the sub engine.
+/// Having a mut ref allows you to control the graphics hardware.
+///
+/// See [`crate::Hw::take_video`] for information on how to get an instance of this struct.
+///
+/// Currently, only the main engine is supported.
+/// Only modes [`Mode5`] and [`VramA`] are implemented.
+///
+/// # Example
+/// ```rust,no_run
+/// # #[entry]
+/// # fn main(mut hw: nds::Hw) -> ! {
+///   let mut video = hw.take_video().unwrap();
+///   // Use the main engine to draw from Bank A
+///   let mut graphics = video.new_graphics::<VramA>();
+/// # }
+/// ```
 pub struct Graphics<'v, M> {
     _mode: PhantomData<M>,
     _video: PhantomData<&'v ()>,
@@ -98,43 +115,22 @@ impl<'g> Graphics<'g, VramA> {
     }
 }
 
-pub trait GraphicsMode {
+pub trait GraphicsMode: crate::private::Sealed {
+    #[doc(hidden)]
     const MODE: DispCntFlags;
 }
 
+/// Marker struct that tells the compiler to construct a [`Graphics`] struct that uses the normal
+/// graphics engine.
 pub struct Mode5;
-
 impl GraphicsMode for Mode5 {
     const MODE: DispCntFlags =
         DispCntFlags::union(DispCntFlags::MODE5, DispCntFlags::DISPLAY_GRAPHICS);
 }
 
+/// Marker struct that tells the compiler to construct a [`Graphics`] struct that display directly from VRAM
 pub struct VramA;
 impl GraphicsMode for VramA {
     const MODE: DispCntFlags =
         DispCntFlags::union(DispCntFlags::VRAM_A, DispCntFlags::DISPLAY_VRAM);
-}
-
-pub struct Layer0(());
-impl LayerMarker for Layer0 {
-    const LAYER_INDEX: usize = 0;
-}
-
-pub struct Layer1(());
-impl LayerMarker for Layer1 {
-    const LAYER_INDEX: usize = 1;
-}
-
-pub struct Layer2(());
-impl LayerMarker for Layer2 {
-    const LAYER_INDEX: usize = 2;
-}
-
-pub struct Layer3(());
-impl LayerMarker for Layer3 {
-    const LAYER_INDEX: usize = 3;
-}
-
-pub trait LayerMarker: crate::private::Sealed {
-    const LAYER_INDEX: usize;
 }

@@ -1,9 +1,6 @@
 use core::{marker::PhantomData, mem::size_of};
 
-use crate::display::{
-    graphics::{Layer2, Layer3},
-    AffineTransform, IntoRegisterValue,
-};
+use crate::display::{AffineTransform, IntoRegisterValue, Layer2, Layer3};
 
 use super::AffineBackgroundMarker;
 
@@ -48,7 +45,6 @@ impl<'g, L> DirectBitmapLayer<'g, L> {
         }
     }
 
-    
     /// Returns a mut ptr to the framebuffer of this layer.
     ///
     /// # Safety
