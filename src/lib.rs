@@ -8,7 +8,6 @@
 pub use nds_proc_macros::{entry, panic_screen};
 pub use nds_sys as sys;
 
-pub mod background;
 #[macro_use]
 pub mod debug;
 pub mod cache;
@@ -25,7 +24,6 @@ pub mod sprite;
 pub mod system;
 pub mod video;
 pub use peripherals::Hw;
-pub mod display;
 
 #[doc(hidden)]
 mod private {
