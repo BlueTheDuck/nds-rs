@@ -121,7 +121,7 @@ impl<'g> Graphics<'g, VramA> {
 
 /// Marker trait that limits which modes can be used with [`Graphics`].
 #[doc(hidden)]
-pub trait GraphicsMode : crate::private::Sealed {
+pub trait GraphicsMode: crate::private::Sealed {
     #[doc(hidden)]
     const MODE: DispCntFlags;
 }

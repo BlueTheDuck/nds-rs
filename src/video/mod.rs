@@ -1,6 +1,7 @@
 use self::graphics::{Graphics, GraphicsMode};
 
 pub mod backgrounds;
+pub mod banks;
 pub mod graphics;
 mod layers;
 pub use layers::*;

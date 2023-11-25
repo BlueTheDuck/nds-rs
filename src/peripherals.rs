@@ -1,6 +1,6 @@
 use spin::Mutex;
 
-use crate::display::Video;
+use crate::video::Video;
 
 #[no_mangle]
 pub static __HW: Mutex<Option<Hw>> = Mutex::new(Some(Hw::new()));

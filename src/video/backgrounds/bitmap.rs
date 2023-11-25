@@ -1,6 +1,6 @@
 use core::{marker::PhantomData, mem::size_of};
 
-use crate::display::{AffineTransform, IntoRegisterValue, Layer2, Layer3};
+use crate::video::{AffineTransform, IntoRegisterValue, Layer2, Layer3};
 
 use super::AffineBackgroundMarker;
 

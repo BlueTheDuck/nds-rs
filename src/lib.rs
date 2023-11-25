@@ -32,11 +32,11 @@ mod private {
     /// traits and types.
     pub trait Sealed {}
 
-    impl<'g, L> Sealed for crate::display::backgrounds::DirectBitmapLayer<'g, L> {}
-    impl Sealed for crate::display::Layer0 {}
-    impl Sealed for crate::display::Layer1 {}
-    impl Sealed for crate::display::Layer2 {}
-    impl Sealed for crate::display::Layer3 {}
-    impl Sealed for crate::display::graphics::Mode5 {}
-    impl Sealed for crate::display::graphics::VramA {}
+    impl<'g, L> Sealed for crate::video::backgrounds::DirectBitmapLayer<'g, L> {}
+    impl Sealed for crate::video::Layer0 {}
+    impl Sealed for crate::video::Layer1 {}
+    impl Sealed for crate::video::Layer2 {}
+    impl Sealed for crate::video::Layer3 {}
+    impl Sealed for crate::video::graphics::Mode5 {}
+    impl Sealed for crate::video::graphics::VramA {}
 }
