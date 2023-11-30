@@ -6,22 +6,22 @@ use super::AffineBackgroundMarker;
 
 #[derive(Clone, Copy)]
 pub enum DirectBitmapSize {
-    /// 256x256
+    /// 128x128
     Small = 0,
-    /// 256x512
-    Tall = 1,
+    /// 256x256
+    Normal = 1,
     /// 512x256
     Wide = 2,
     /// 512x512
-    Big = 3,
+    Large = 3,
 }
 impl DirectBitmapSize {
     pub const fn pixel_count(self) -> usize {
         match self {
-            Self::Small => 256 * 256,
-            Self::Tall => 256 * 512,
+            Self::Small => 128 * 128,
+            Self::Normal => 256 * 256,
             Self::Wide => 512 * 256,
-            Self::Big => 512 * 512,
+            Self::Large => 512 * 512,
         }
     }
 }
@@ -76,13 +76,8 @@ impl<'g> IntoRegisterValue for DirectBitmapLayer<'g, Layer2> {
         const TILE_BASE_BLOCK: u16 = 0b00000000_00000100;
         const COLOR_MODE: u16 = 0b00000000_10000000;
 
-        let size = match self.size {
-            DirectBitmapSize::Small => 0,
-            DirectBitmapSize::Tall => 1,
-            DirectBitmapSize::Wide => 2,
-            DirectBitmapSize::Big => 3,
-        };
-        (size << 14) | COLOR_MODE | TILE_BASE_BLOCK | (self.block as u16) << 2
+        let size = (self.size as u16) << 14;
+        size | COLOR_MODE | TILE_BASE_BLOCK | (self.block as u16) << 2
     }
 }
 impl<'g> IntoRegisterValue for DirectBitmapLayer<'g, Layer3> {
@@ -94,13 +89,8 @@ impl<'g> IntoRegisterValue for DirectBitmapLayer<'g, Layer3> {
         const TILE_BASE_BLOCK: u16 = 0b00000000_00000100;
         const COLOR_MODE: u16 = 0b00000000_10000000;
 
-        let size = match self.size {
-            DirectBitmapSize::Small => 0,
-            DirectBitmapSize::Tall => 1,
-            DirectBitmapSize::Wide => 2,
-            DirectBitmapSize::Big => 3,
-        };
-        (size << 14) | COLOR_MODE | TILE_BASE_BLOCK | (self.block as u16) << 2
+        let size = (self.size as u16) << 14;
+        size | COLOR_MODE | TILE_BASE_BLOCK | (self.block as u16) << 2
     }
 }
 
