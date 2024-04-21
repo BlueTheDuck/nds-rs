@@ -1,3 +1,4 @@
+use crate::cache;
 use crate::debug;
 
 use crate::println;
@@ -5,7 +6,7 @@ use crate::println;
 #[panic_handler]
 pub fn panic(info: &core::panic::PanicInfo) -> ! {
     unsafe {
-        nds_sys::cache::DC_FlushAll();
+        cache::dc_flush_all();
     }
     println!("Panic! At the DS");
     #[cfg(feature = "nocash_tty")]
@@ -41,15 +42,12 @@ fn panic_screen() -> ! {
 #[cfg(feature = "default_panic_screen")]
 #[no_mangle]
 pub extern "C" fn __nds_panic_screen() -> ! {
-    // TODO: Remove dependencies on C and libnds
-    use crate::sys::bindings;
-    extern "C" {
-        fn iprintf(ptr: *const u8);
-    }
+    use nds_sys::bindings;
+
     unsafe {
         bindings::consoleDemoInit();
         bindings::consoleClear();
-        iprintf(b"A panic has ocurred\0".as_ptr());
+        bindings::printf(b"An error has ocurred\0".as_ptr() as *const _);
     }
     loop {
         crate::interrupts::swi_wait_for_v_blank();

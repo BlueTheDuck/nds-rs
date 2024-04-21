@@ -13,7 +13,7 @@ rustflags = [
     "-Ctarget-cpu=arm946e-s",
     
     # link sysbase and the C library
-    "-Clink-args=-Wl,--start-group -lsysbase -lc -Wl,--end-group",
+    "-Clink-args=-Wl,--start-group -lc -Wl,--end-group",
 
     # Some debugging flags
     "-Clink-arg=-Wl,-Map=target/nds.map",

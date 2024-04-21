@@ -12,7 +12,7 @@
   "disable-redzone": true,
   "features": "+strict-align,+soft-float,+atomics-32",
   "has-thumb-interworking": true,
-  "env": "newlib",
+  "env": "picolibc",
   "executables": true,
   "no-default-libraries": false,
   "is-builtin": false,
