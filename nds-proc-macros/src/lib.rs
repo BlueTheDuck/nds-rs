@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, ItemFn};
+use syn::{parse_macro_input, ItemFn, Meta, MetaNameValue, ReturnType, Type};
 
 /// Use it to mark the ROM entry point.
 ///
@@ -21,58 +21,41 @@ use syn::{parse_macro_input, ItemFn};
 #[proc_macro_attribute]
 pub fn entry(_: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemFn);
-    let name = input.sig.ident.clone();
 
-    quote! {
-        #[no_mangle]
-        pub extern "C" fn main() -> ! {
-            #input
-            let peripherals = nds::Hw::take().unwrap();
-            let ret = #name(peripherals);
-            panic!("main() returned {:?}",ret);
+    // Check the signature is correct:
+    // - Must be `fn() -> !`
+    // - Must be `pub`
+    // - Must have 1 argument
+    // - Must not have `link_name` or `no_mangle` attributes
+
+    if let ReturnType::Type(_, t) = &input.sig.output {
+        assert!(
+            matches!(**t, Type::Never(_)),
+            "The function must return `!`"
+        );
+    } else {
+        panic!("The function must return `!`");
+    }
+
+    assert!(matches!(input.vis, syn::Visibility::Public(_)));
+
+    assert_eq!(input.sig.inputs.len(), 1);
+
+    for attr in &input.attrs {
+        match &attr.meta {
+            Meta::NameValue(MetaNameValue { path, .. }) if path.is_ident("link_name") => {
+                panic!("The `link_name` attribute is not allowed here");
+            }
+            Meta::Path(path) if path.is_ident("no_mangle") => {
+                panic!("The `no_mangle` attribute is not allowed here");
+            }
+            _ => {}
         }
     }
-    .into()
-}
 
-/// Use it to mark a "screen of death" on run ROM.
-///
-/// The function marked with this attribute will be called after a panic ocurrs in the following order:
-/// `panic!` -> `panic_handler` (defined on `nds-rs`) -> function marked with `panic_screen`
-///
-/// This is only provided for "cosmetic purposes". As in, if you want to show a nice
-/// error screen, (instead of just hanging the program) you can do it here.
-///
-/// `nds-rs` provides a default `panic_screen` function under the default
-/// feature `default_panic_screen`, set `default_features = false` to disable it.
-/// Once you have done that, you can define your own function like this:
-/// ```rust,no_run
-/// #[panic_screen]
-/// fn panic_screen() -> ! {
-///     // clear screen / show message / play sound / whatever
-///     loop { // Remember to loop forever!
-///         crate::interrupts::swi_wait_for_v_blank();
-///     }
-/// }
-/// ```
-/// Important notes:
-/// - The function must be `fn() -> !`
-/// - The function must not panic
-/// - If no `panic_screen` is defined, Rust will complain about an undefined
-///   reference to `__nds_panic_screen`
-///
-#[proc_macro_attribute]
-pub fn panic_screen(_: TokenStream, input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as ItemFn);
-    let body = input.block;
-    // TODO: Check that function has `pub fn() -> !` as signature
-    {
-        quote! {
-            #[no_mangle]
-            pub extern "C" fn __nds_panic_screen() -> ! {
-                #body
-            }
-        }
+    quote! {
+        #[link_name = "rust_main"]
+        #input
     }
     .into()
 }
