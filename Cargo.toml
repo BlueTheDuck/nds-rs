@@ -1,37 +1,4 @@
-[package]
-name = "nds"
-version = "0.1.0"
-authors = ["BlueTheDuck <hello@perezv.ar>"]
-edition = "2021"
+[workspace]
+resolver = "2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[workspace]
-members = ["nds-sys", "nds-proc-macros"]
-
-[dependencies]
-nds-sys = { path = "nds-sys" }
-nds-proc-macros = { path = "nds-proc-macros", optional = true }
-bitflags = "2.4.1"
-paste = "1"
-spin = { version = "0.9", default-features = false, features = [
-    "spin_mutex",
-    "portable_atomic",
-], optional = true }
-portable-atomic = { version = "1.4.2", default-features = false, features = [
-    "unsafe-assume-single-core",
-    "require-cas",
-], optional = true }
-embedded-graphics-core = { version = "0.4.0", optional = true }
-once_cell = { version = "1.18.0", default-features = false, optional = true }
-
-[features]
-default = [
-    "default_panic_screen",
-    "nocash_tty",
-    "proc_macros",
-    "embedded-graphics-core",
-]
-default_panic_screen = []
-nocash_tty = ["spin", "once_cell", "portable-atomic"]
-proc_macros = ["nds-proc-macros"]

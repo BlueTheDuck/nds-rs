@@ -1,0 +1,11 @@
+[package]
+name = "nds-rt"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[features]
+default = []
+
+[dependencies]
+nds-rs = { path = "../nds-rs", default-features = false }
