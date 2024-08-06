@@ -2,14 +2,19 @@
 
 use nds_rs::Hw;
 
+/// Entry point called from the C runtime
+///
+/// # Safety
+///
+/// Must never be called by user code.
 #[no_mangle]
-pub extern "C" fn main() -> ! {
+pub unsafe extern "C" fn main() -> ! {
     extern "Rust" {
-        #[link_name = "rust_main"]
+        #[link_name = "__rust_user_main"]
         fn main(hw: Hw) -> !;
     }
 
-    let peripherals = Hw::take().unwrap();
+    let peripherals = Hw::take().unwrap_unchecked();
     unsafe {
         main(peripherals);
     }
