@@ -1,7 +1,5 @@
 use core::mem::size_of_val;
 
-use nds_sys::bindings;
-
 /// Flushes the data cache to memory.
 ///
 /// # Safety
@@ -12,7 +10,7 @@ use nds_sys::bindings;
 /// See also [`dc_invalidate_all`], which is the opposite operation.
 #[inline]
 pub unsafe fn dc_flush_all() {
-    bindings::CP15_CleanAndFlushDCache();
+    todo!()
 }
 
 /// Flushes the data cache to memory for the given slice.
@@ -25,7 +23,7 @@ pub unsafe fn dc_flush_all() {
 /// See also [`dc_invalidate_slice`], which is the opposite operation.
 #[inline]
 pub unsafe fn dc_flush_slice<T>(slice: &[T]) {
-    bindings::CP15_CleanAndFlushDCacheRange(slice.as_ptr() as _, size_of_val(slice));
+    todo!()
 }
 
 /// Flushes the data cache to memory for the given array.
@@ -38,7 +36,7 @@ pub unsafe fn dc_flush_slice<T>(slice: &[T]) {
 /// See also [`dc_invalidate_array`], which is the opposite operation.
 #[inline]
 pub unsafe fn dc_flush_array<const N: usize, T>(array: &[T; N]) {
-    bindings::CP15_CleanAndFlushDCacheRange(array.as_ptr() as _, size_of_val(array));
+    todo!()
 }
 
 /// Invalidates the data cache for the given slice.
@@ -51,7 +49,7 @@ pub unsafe fn dc_flush_array<const N: usize, T>(array: &[T; N]) {
 /// See also [`dc_flush_slice`], which is the opposite operation.
 #[inline]
 pub unsafe fn dc_invalidate_slice<T>(slice: &[T]) {
-    bindings::CP15_FlushDCacheRange(slice.as_ptr() as _, size_of_val(slice))
+    todo!()
 }
 
 /// Invalidates the data cache for the given array.
@@ -64,5 +62,5 @@ pub unsafe fn dc_invalidate_slice<T>(slice: &[T]) {
 /// See also [`dc_flush_slice`], which is the opposite operation.
 #[inline]
 pub unsafe fn dc_invalidate_array<const N: usize, T>(array: &[T; N]) {
-    bindings::CP15_FlushDCacheRange(array.as_ptr() as _, size_of_val(array))
+    todo!()
 }

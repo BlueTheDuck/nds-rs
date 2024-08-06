@@ -12,7 +12,7 @@ macro_rules! bit {
 }
 
 pub mod background;
-pub mod bindings;
+pub mod console;
 pub mod debug;
 pub mod dma;
 pub mod input;
