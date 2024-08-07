@@ -5,24 +5,22 @@ edition = "2021"
 
 [dependencies]
 nds-sys = { path = "../nds-sys" }
-bitflags = "2.4.1"
+bitflags = "2.6"
 paste = "1"
 spin = { version = "0.9", default-features = false, features = [
     "spin_mutex",
     "portable_atomic",
-], optional = true }
-portable-atomic = { version = "1.4.2", default-features = false, features = [
+] }
+portable-atomic = { version = "1.7", default-features = false, features = [
     "unsafe-assume-single-core",
     "require-cas",
-], optional = true }
+] }
 embedded-graphics-core = { version = "0.4.0", optional = true }
-once_cell = { version = "1.18.0", default-features = false, optional = true }
+once_cell = { version = "1.19.0", default-features = false, optional = true }
 
 [features]
 default = [
     "nocash_tty",
-    "dep:embedded-graphics-core",
-    "dep:spin",
+    "dep:embedded-graphics-core"
 ]
-default_panic_screen = []
-nocash_tty = ["dep:spin", "dep:once_cell", "dep:portable-atomic"]
+nocash_tty = ["dep:once_cell"]

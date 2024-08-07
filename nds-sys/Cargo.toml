@@ -8,7 +8,7 @@ build = "build.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bitflags = "2.4.1"
+bitflags = "2.6.0"
 libc = { version = "0.2.137", features = ["extra_traits", "const-extern-fn"] }
 
 [build-dependencies]

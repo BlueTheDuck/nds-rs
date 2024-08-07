@@ -1,5 +1,4 @@
 #![no_std]
-#![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
 #![feature(adt_const_params)]
 #![allow(unused_parens, dead_code)]
