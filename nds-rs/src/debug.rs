@@ -1,5 +1,6 @@
-use core::fmt::{Debug, Write};
+use core::fmt::{Arguments, Write};
 use nds_sys::debug::registers;
+use spin::Mutex;
 extern crate alloc;
 use core::arch::asm;
 
@@ -9,61 +10,94 @@ macro_rules! print {
 }
 #[macro_export]
 macro_rules! println {
-    () => (print!("\n"));
+    () => ($crate::print!("\n\0"));
     ($($arg:tt)*) => ({
-        print!("{}\n", format_args!($($arg)*))
+        $crate::debug::_print(format_args!($($arg)*));
+        $crate::println!();
     });
 }
 
-/// Writes a string byte-by-byte to the NO$GBA TTY.
-/// This function won't allocate, so the caller has to take care to
-/// null-terminate their strings. Still, this function has 2 paths:
-/// If the string _is null-terminated_, it will be passed directly to NO$GBA,
-/// allowing for %param%s and faster code execution.
-/// Otherwise, is will be copied byte-by-byte to the [`Char Out`](registers::CHAR_OUT)
-#[inline]
-pub fn _print(args: core::fmt::Arguments) {
-    #[cfg(feature = "nocash_tty")]
-    {
-        let mut nocash = NOCASH.lock();
-        write!(nocash, "{}\0", args).unwrap();
+#[derive(Clone, Copy)]
+enum Logger {
+    None,
+    NoCash(NoCash),
+    Tty(Tty),
+}
+
+pub fn log_to_nocash() -> bool {
+    let mut logger_lock = LOGGER.lock();
+    if let Some(nocash) = NoCash::new() {
+        *logger_lock = Logger::NoCash(nocash);
+        true
+    } else {
+        false
     }
 }
 
-#[cfg(feature = "nocash_tty")]
+pub fn log_to_tty() -> bool {
+    extern "C" {
+        #[link_name = "consoleDemoInit"]
+        fn console_demo_init() -> *const core::ffi::c_void;
+    }
+
+    let mut logger_lock = LOGGER.lock();
+    unsafe {
+        console_demo_init();
+    }
+    *logger_lock = Logger::Tty(Tty::new());
+
+    true
+}
+
+/// Passes a formatable string to the configured debugger output.
+///
+/// If the string is null-terminated and doesn't contain any format specifiers,
+/// it is guaranteed to be passed directly to the debugger without any allocations.
+#[inline]
+pub fn _print(args: Arguments) {
+    let logger = LOGGER.lock();
+
+    // Check fast case: the string is null-terminated and is one segment
+    if let Some(cstr) = args.as_str().filter(|s| s.ends_with('\0')) {
+        match *logger {
+            Logger::NoCash(mut nocash) => {
+                nocash.write_str(cstr).unwrap();
+            }
+            Logger::Tty(mut tty) => {
+                tty.write_str(cstr).unwrap();
+            }
+            _ => {}
+        }
+    } else {
+        match *logger {
+            Logger::NoCash(mut nocash) => {
+                write!(nocash, "{args}").unwrap();
+            }
+            Logger::Tty(mut tty) => {
+                write!(tty, "{args}").unwrap();
+            }
+            _ => {}
+        }
+    }
+}
+
 /// Used to access all NO$GBA debugging functions.
-/// The debugger is detected on startup, and if it is found,
-/// [`NoCash::is_enabled`] will return `true`.
-pub static NOCASH: spin::Mutex<once_cell::unsync::Lazy<NoCash>> =
-    spin::Mutex::new(once_cell::unsync::Lazy::new(NoCash::new));
+///
+/// NoCash is detected at startup, while TTY may be enabled or disabled at any time.
+static LOGGER: Mutex<Logger> = Mutex::new(Logger::None);
 
 /// Symbolizes the emulator NO$GBA and provides
 /// an API for its debugging capabilities.
-/// On release builds these functions don't do anything;
-/// and when [`NoCash::is_enabled`] returns `false`, they return immediatly
-pub struct NoCash {
-    /// Are we running on NO$GBA?
-    /// If `false`, then these functions won't do anything.
-    found: bool,
-}
+/// On release builds these functions don't do anything
+#[derive(Clone, Copy)]
+pub struct NoCash;
 impl NoCash {
-    pub fn new() -> Self {
-        Self {
-            found: Self::get_emu_id().is_some(),
+    pub fn new() -> Option<Self> {
+        match Self::get_emu_id() {
+            Some("NO$GBA") => Some(Self),
+            Some(s) if s.starts_with("melonDS") => Some(Self),
+            _ => None,
         }
-    }
-
-    /// The static instance [`NOCASH`] is disabled by default,
-    /// this will try to find out if we are running in an emulator.
-    /// On release, [`NoCash::get_emu_id()`] always returns [`None`], so
-    /// all debugging is disabled
-    fn find_debugger(&mut self) {
-        self.found = Self::get_emu_id().is_some();
-    }
-
-    #[inline]
-    pub fn is_enabled(&self) -> bool {
-        self.found
     }
 
     /// Prints to the emulator TTY. NO$GBA will substitute %fmt% with a value
@@ -77,21 +111,13 @@ impl NoCash {
     /// - lastclks: show number of cycles since previous lastclks (or zeroclks)
     /// - zeroclks: resets the 'lastclks' counter
     ///
+    /// # Safety
     /// The caller must make sure the string is null-terminated
     ///
-    /// Doesn't do anything unless [NoCash::is_enabled()] returns true
-    ///
     /// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
     #[inline]
-    pub fn print_with_params_no_alloc(&mut self, s: &str) {
-        if self.is_enabled() {
-            unsafe {
-                // SAFETY: We are writing only a pointer to the NO$GBA TTY,
-                // the string might not be null-terminated (and NO$GBA might print garbage),
-                // but that is not my problem
-                registers::STRING_OUT_PARAM_LF.write_volatile(s.as_ptr());
-            }
-        }
+    pub unsafe fn print_with_params_no_alloc(&mut self, s: &str) {
+        registers::STRING_OUT_PARAM_LF.write_volatile(s.as_ptr());
     }
 
     /// Prints to the emulator TTY. NO$GBA will substitute %fmt% with a value
@@ -105,18 +131,12 @@ impl NoCash {
     /// - lastclks: show number of cycles since previous lastclks (or zeroclks)
     /// - zeroclks: resets the 'lastclks' counter
     ///
-    /// Doesn't do anything unless [NoCash::is_enabled()] returns true
-    ///
-    /// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
+    ///  [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
     #[inline]
-    pub fn print_with_params<S: Debug>(&mut self, s: S) {
-        // TODO: Change signature to something that makes more sense
-        // and remove the \0
-        if self.is_enabled() {
-            let s = alloc::format!("{:?}\0", s);
-            unsafe {
-                registers::STRING_OUT_PARAM_LF.write_volatile(s.as_ptr());
-            }
+    pub fn print_with_params(&mut self, s: &Arguments) {
+        let formatted = alloc::format!("{s}\0");
+        unsafe {
+            registers::STRING_OUT_PARAM_LF.write_volatile(formatted.as_ptr());
         }
     }
 
@@ -154,6 +174,22 @@ impl Write for NoCash {
         unsafe {
             registers::CHAR_OUT.write_volatile(c);
         }
+        Ok(())
+    }
+}
+
+#[derive(Clone, Copy)]
+struct Tty;
+impl Tty {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Write for Tty {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        picolibc::write_str_to_stderr(s);
+
         Ok(())
     }
 }
