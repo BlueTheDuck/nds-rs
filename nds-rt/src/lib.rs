@@ -1,6 +1,8 @@
 #![no_std]
 
-use nds_rs::Hw;
+use core::panic::PanicInfo;
+
+use nds_rs::{header::NdsHeader, println, Hw};
 
 /// Entry point called from the C runtime
 ///
@@ -22,8 +24,8 @@ pub unsafe extern "C" fn main() -> ! {
 
 #[panic_handler]
 pub unsafe fn panic(info: &PanicInfo) -> ! {
-    let game_title = "TODO"; // TODO: Get game title from header
-    println!("'{}' panicked", game_title);
+    let game_title = NdsHeader::running().title().unwrap_or("Unknown");
+    println!("'{game_title}' panicked");
     if let Some(location) = info.location() {
         println!(
             "{}:{}:{}",
