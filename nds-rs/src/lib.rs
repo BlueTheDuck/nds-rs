@@ -19,6 +19,7 @@ mod peripherals;
 pub mod sprite;
 pub mod system;
 pub mod video;
+mod critical_section;
 pub use peripherals::Hw;
 
 #[doc(hidden)]
