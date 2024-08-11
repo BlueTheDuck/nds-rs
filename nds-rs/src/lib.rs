@@ -15,7 +15,6 @@ pub mod input;
 pub mod interrupts;
 pub mod macros;
 mod memalloc;
-mod panic;
 mod peripherals;
 pub mod sprite;
 pub mod system;

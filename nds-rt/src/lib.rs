@@ -21,6 +21,17 @@ pub unsafe extern "C" fn main() -> ! {
 }
 
 #[panic_handler]
-pub fn panic(info: &core::panic::PanicInfo) -> ! {
+pub unsafe fn panic(info: &PanicInfo) -> ! {
+    let game_title = "TODO"; // TODO: Get game title from header
+    println!("'{}' panicked", game_title);
+    if let Some(location) = info.location() {
+        println!(
+            "{}:{}:{}",
+            location.file(),
+            location.line(),
+            location.column()
+        );
+    }
+    println!("{}", info.message());
     loop {}
 }
