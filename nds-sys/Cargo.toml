@@ -12,6 +12,6 @@ bitflags = "2.6.0"
 libc = { version = "0.2.137", features = ["extra_traits", "const-extern-fn"] }
 
 [build-dependencies]
-bindgen = "0.69.4"
+bindgen.workspace = true
 chrono = { version = "0.4.38", default-features = false, features = ["clock"] }
 
