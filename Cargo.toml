@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["nds-sys", "nds-proc-macros", "nds-rt", "nds-rs", "picolibc"]
+members = ["bitfield-tools", "nds-sys", "nds-proc-macros", "nds-rt", "nds-rs", "picolibc"]
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
