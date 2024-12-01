@@ -3,7 +3,7 @@ use core::ffi::CStr;
 pub const HEADER_START: *const u8 = 0x027FFE00 as _;
 
 #[repr(C)]
-struct NdsHeader {
+pub struct NdsHeader {
     game_title: [u8; 12],
     game_code: [u8; 4],
     maker_code: [u8; 2],
