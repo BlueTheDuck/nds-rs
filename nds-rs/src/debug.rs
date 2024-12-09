@@ -7,6 +7,9 @@ use spin::Mutex;
 extern crate alloc;
 use core::arch::asm;
 
+mod safe_chunks_iter;
+use safe_chunks_iter::SafeChunksIter;
+
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::debug::_print(format_args!($($arg)*)));
@@ -30,6 +33,28 @@ enum Logger {
 /// This is the logging target that will be used by the `print!` and `println!` macros.
 static LOGGER: Mutex<Logger> = Mutex::new(Logger::None);
 
+/// Makes the `print!` and `println!` macros write to the NO$GBA debugger console.
+/// Only on output can be used as default, so calling this function will override
+/// any previous logger.
+/// 
+/// The following specifiers can be used in the formatted strings:
+///
+/// - r0,r1,r2,...,r15: show register content (displayed as 32bit Hex number)
+/// - sp,lr,pc: alias for r13,r14,r15
+/// - scanline: show current scanline number
+/// - frame: show total number of frames since coldboot
+/// - totalclks: show total number of clock cycles since coldboot
+/// - lastclks: show number of cycles since previous lastclks (or zeroclks)
+/// - zeroclks: resets the 'lastclks' counter
+///
+/// See [gbatek] for more information.
+///
+/// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
+/// 
+/// Returns `true` if the emulator is NO$GBA or melonDS, `false` otherwise.
+/// 
+/// ## See also
+/// - [`log_to_tty`]
 pub fn log_to_nocash() -> bool {
     let mut logger_lock = LOGGER.lock();
     if NoCash::get_emu_id().is_some() {
@@ -40,6 +65,14 @@ pub fn log_to_nocash() -> bool {
     }
 }
 
+/// Makes the `print!` and `println!` macros write to the stdout on the bottom screen.
+/// Only on output can be used as default, so calling this function will override
+/// any previous logger.
+/// 
+/// Returns `true` if it could change the display mode to text, `false` otherwise.
+/// 
+/// ## See also
+/// - [`log_to_nocash`]
 pub fn log_to_tty() -> bool {
     extern "C" {
         #[link_name = "consoleDemoInit"]
@@ -47,11 +80,13 @@ pub fn log_to_tty() -> bool {
     }
 
     let mut logger_lock = LOGGER.lock();
+    // TODO: don't unconditionaly call console_demo_init?
     unsafe {
         console_demo_init();
     }
     *logger_lock = Logger::Tty;
 
+    // TODO: check if the console was initialized
     true
 }
 
@@ -90,9 +125,21 @@ pub fn _print(args: Arguments) {
     }
 }
 
-/// Symbolizes the emulator NO$GBA and provides
-/// an API for its debugging capabilities.
-/// On release builds these functions don't do anything
+/// Symbolizes the NO$GBA emulator and provides a way to write to its TTY.
+///
+/// NO$GBA in particular supports formatted strings with the following specifiers:
+///
+/// - r0,r1,r2,...,r15: show register content (displayed as 32bit Hex number)
+/// - sp,lr,pc: alias for r13,r14,r15
+/// - scanline: show current scanline number
+/// - frame: show total number of frames since coldboot
+/// - totalclks: show total number of clock cycles since coldboot
+/// - lastclks: show number of cycles since previous lastclks (or zeroclks)
+/// - zeroclks: resets the 'lastclks' counter
+///
+/// See [gbatek] for more information.
+///
+/// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
 #[derive(Clone, Copy)]
 pub struct NoCash;
 impl NoCash {
@@ -100,18 +147,7 @@ impl NoCash {
     /// Buffers are used to null-terminate strings before passing them to the emulator.
     const BUFSIZE: usize = 256;
 
-    /// Writes to the emulator TTY. NO$GBA will substitute %fmt% with a value
-    /// according to this list (taken from [gbatek]):
-    ///
-    /// - r0,r1,r2,...,r15: show register content (displayed as 32bit Hex number)
-    /// - sp,lr,pc: alias for r13,r14,r15
-    /// - scanline: show current scanline number
-    /// - frame: show total number of frames since coldboot
-    /// - totalclks: show total number of clock cycles since coldboot
-    /// - lastclks: show number of cycles since previous lastclks (or zeroclks)
-    /// - zeroclks: resets the 'lastclks' counter
-    ///
-    /// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
+    /// Writes to the emulator TTY, allowing for formatted strings.
     #[inline]
     pub fn write_cstr_param(&mut self, s: &CStr) {
         unsafe {
@@ -120,34 +156,12 @@ impl NoCash {
     }
 
     /// Formats the arguments and writes the resulting string to the emulator TTY. NO$GBA
-    /// will substitute %fmt% with a value according to this list (taken from [gbatek]):
-    ///
-    /// - r0,r1,r2,...,r15: show register content (displayed as 32bit Hex number)
-    /// - sp,lr,pc: alias for r13,r14,r15
-    /// - scanline: show current scanline number
-    /// - frame: show total number of frames since coldboot
-    /// - totalclks: show total number of clock cycles since coldboot
-    /// - lastclks: show number of cycles since previous lastclks (or zeroclks)
-    /// - zeroclks: resets the 'lastclks' counter
-    ///
-    ///  [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
+    /// will substitute %fmt% with the formatted arguments.
     #[inline]
     pub fn write_fmt_with_params(&mut self, s: &Arguments) {
         let formatted = alloc::format!("{s}\0");
-        write!(self, "{formatted}").unwrap();
-    }
-
-    /// Helper function to write a string in chunks to the emulator TTY.
-    ///
-    /// The input is copied to a buffer and null-terminated, then passed to the emulator.
-    fn write_in_chunks<const B: usize>(&mut self, s: &str, buf: &mut [u8; B]) {
-        for chunk in s.as_bytes().chunks(B - 1) {
-            buf[..chunk.len()].copy_from_slice(chunk);
-            buf[chunk.len()] = 0;
-            // SAFETY: ^ we just null-terminated the buf
-            let cstr = unsafe { CStr::from_bytes_with_nul_unchecked(buf) };
-            self.write_cstr_param(cstr);
-        }
+        let cstr = unsafe { CStr::from_bytes_with_nul(formatted.as_bytes()).unwrap_unchecked() };
+        self.write_cstr_param(cstr);
     }
 
     /// Returns a string identifying the emulator that the ROM is running on.
@@ -160,49 +174,33 @@ impl NoCash {
 impl Write for NoCash {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         // NO$GBA uses C-style strings, so we can only pass null-terminated strings.
-        // Since we promised to *not* allocate, we can only use this register
-        // **if, and only if,** the string we received is already null-terminated...
-        if let Ok(s) = CStr::from_bytes_until_nul(s.as_bytes()) {
-            self.write_cstr_param(s);
-        } else {
-            // ...otherwise we have to copy it to a buffer and null-terminate it.
-            // Since we have a fixed-size buffer, we have to be careful when coping
-            // chunks of the string to it, we mustn't break the %fmt% specifiers.
+        // Since we promised to *not* allocate, we have to copy it to a buffer and null-terminate it.
+        // Since we have a fixed-size buffer, we have to be careful when coping
+        // chunks of the string to it, we mustn't break the %fmt% specifiers.
 
-            let mut buffer = [0; NoCash::BUFSIZE];
+        // TODO: this can be optimized by removing checks and using unsafe code, see comments
 
-            let mut remaining = s;
-            let mut next_marker = remaining.find("%");
-            while let Some(opening_marker_pos) = next_marker {
-                let closing_marker_pos = remaining[opening_marker_pos + 1..]
-                    .find("%")
-                    .map(|pos| pos + 1)
-                    .unwrap_or(remaining.len());
-
-                // if the closing marker is close enought
-                // we can include the entire specifier
-                let split_point = if closing_marker_pos < Self::BUFSIZE - 1 {
-                    closing_marker_pos
-                } else {
-                    // otherwise we stop just before the spec
-                    // NOTE:
-                    //  1. openin_marker_pos == 0 -> openin_marker_pos-1 -> panic!
-                    //  2. openin_marker_pos > 0 -> openin_marker_pos-1 -> valid
-                    // Since `closing_marker_pos = opening_marker_pos + n` and `n < Self::BUFSIZE`
-                    // making `closing_marker_pos < Self::BUFSIZE` always true or #1 always false
-                    opening_marker_pos.saturating_sub(1)
-                };
-                let Some((to_write, rest)) = remaining.split_at_checked(split_point) else {
-                    // split_point comes from `find`, so it's always valid
-                    unreachable!();
-                };
-                remaining = rest;
-                next_marker = remaining.find("%");
-                self.write_in_chunks(to_write, &mut buffer);
+        let mut buffer = [0; NoCash::BUFSIZE];
+        for section in SafeChunksIter::<{ Self::BUFSIZE - 1 }>::new(s) {
+            // fill buffer with null bytes so it is always null-terminated
+            // we could set the last byte to 0, but this is more explicit
+            buffer.fill(b'\0');
+            // copy `section` to buffer
+            unsafe {
+                // SAFETY: `section` is shorter than the buffer
+                debug_assert!(section.len() < buffer.len());
+                core::ptr::copy_nonoverlapping(
+                    section.as_bytes().as_ptr(),
+                    buffer.as_mut_ptr(),
+                    section.len(),
+                );
+            };
+            // TODO: remove IF. no need to check if the buffer is null-terminated!
+            if let Ok(cstr) = CStr::from_bytes_until_nul(&buffer) {
+                self.write_cstr_param(cstr);
+            } else {
+                unreachable!()
             }
-
-            // write the remaining part of the string
-            self.write_in_chunks(remaining, &mut buffer);
         }
         Ok(())
     }

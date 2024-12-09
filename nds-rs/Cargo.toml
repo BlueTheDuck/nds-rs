@@ -16,12 +16,9 @@ portable-atomic = { version = "1.7", default-features = false, features = [
     "require-cas",
 ] }
 embedded-graphics-core = { version = "0.4.0", optional = true }
-once_cell = { version = "1.19.0", default-features = false, optional = true, features = ["critical-section"] }
 critical-section = { version = "1.1.2", features = ["restore-state-bool"] }
 
 [features]
 default = [
-    "nocash_tty",
     "dep:embedded-graphics-core"
 ]
-nocash_tty = ["dep:once_cell"]
