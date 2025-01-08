@@ -3,7 +3,7 @@ use spin::Mutex;
 use crate::video::Video;
 
 #[no_mangle]
-pub static __HW: Mutex<Option<Hw>> = Mutex::new(Some(Hw::new()));
+pub static __HW: Mutex<Option<Hw>> = Mutex::new(Some(unsafe { Hw::new() }));
 
 /// Represents the hardware of the console.
 ///
@@ -24,21 +24,21 @@ pub static __HW: Mutex<Option<Hw>> = Mutex::new(Some(Hw::new()));
 /// }
 /// ```
 ///
+#[non_exhaustive]
 pub struct Hw {
-    video: bool,
-    _unused: (),
+    pub video: Video,
 }
-
 impl Drop for Hw {
     fn drop(&mut self) {
-        *__HW.lock() = Some(Hw::new());
+        unsafe {
+            *__HW.lock() = Some(Hw::new());
+        }
     }
 }
 impl Hw {
-    pub(crate) const fn new() -> Self {
+    pub(crate) const unsafe fn new() -> Self {
         Self {
-            video: true,
-            _unused: (),
+            video: Video::new(),
         }
     }
 
@@ -46,14 +46,6 @@ impl Hw {
     pub fn take() -> Option<Self> {
         let mut this = __HW.lock();
         this.take()
-    }
-
-    pub fn take_video<'s>(&'s self) -> Option<Video> {
-        if self.video {
-            Some(Video {})
-        } else {
-            None
-        }
     }
 }
 /*
