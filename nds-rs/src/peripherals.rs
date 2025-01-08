@@ -1,6 +1,6 @@
 use spin::Mutex;
 
-use crate::video::Video;
+use crate::{system::System, video::Video};
 
 #[no_mangle]
 pub static __HW: Mutex<Option<Hw>> = Mutex::new(Some(unsafe { Hw::new() }));
@@ -27,6 +27,7 @@ pub static __HW: Mutex<Option<Hw>> = Mutex::new(Some(unsafe { Hw::new() }));
 #[non_exhaustive]
 pub struct Hw {
     pub video: Video,
+    pub system: System
 }
 impl Drop for Hw {
     fn drop(&mut self) {
@@ -39,6 +40,7 @@ impl Hw {
     pub(crate) const unsafe fn new() -> Self {
         Self {
             video: Video::new(),
+            system: System::new()
         }
     }
 
