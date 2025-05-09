@@ -36,7 +36,7 @@ static LOGGER: Mutex<Logger> = Mutex::new(Logger::None);
 /// Makes the `print!` and `println!` macros write to the NO$GBA debugger console.
 /// Only on output can be used as default, so calling this function will override
 /// any previous logger.
-/// 
+///
 /// The following specifiers can be used in the formatted strings:
 ///
 /// - r0,r1,r2,...,r15: show register content (displayed as 32bit Hex number)
@@ -50,9 +50,9 @@ static LOGGER: Mutex<Logger> = Mutex::new(Logger::None);
 /// See [gbatek] for more information.
 ///
 /// [gbatek]: http://problemkaputt.de/gbatek.htm#debugmessages
-/// 
+///
 /// Returns `true` if the emulator is NO$GBA or melonDS, `false` otherwise.
-/// 
+///
 /// ## See also
 /// - [`log_to_tty`]
 pub fn log_to_nocash() -> bool {
@@ -68,12 +68,14 @@ pub fn log_to_nocash() -> bool {
 /// Makes the `print!` and `println!` macros write to the stdout on the bottom screen.
 /// Only on output can be used as default, so calling this function will override
 /// any previous logger.
-/// 
+///
 /// Returns `true` if it could change the display mode to text, `false` otherwise.
-/// 
+///
 /// ## See also
 /// - [`log_to_nocash`]
 pub fn log_to_tty() -> bool {
+    todo!("Write methods are not implemented yet!");
+
     extern "C" {
         #[link_name = "consoleDemoInit"]
         fn console_demo_init() -> *const core::ffi::c_void;
@@ -217,14 +219,12 @@ impl Write for NoCash {
 pub struct Tty;
 impl Tty {
     pub fn write_cstr(&mut self, cstr: &CStr) {
-        picolibc::printf(cstr);
+        todo!()
     }
 }
 impl Write for Tty {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        picolibc::fwrite(s.as_bytes(), picolibc::STDOUT);
-
-        Ok(())
+        todo!()
     }
 }
 

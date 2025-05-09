@@ -30,7 +30,6 @@ fn configure_background_h(builder: bindgen::Builder) -> bindgen::Builder {
         .allowlist_file(".*/background\\.h")
 }
 
-
 fn main() {
     // Time at the start of the build
     let now = chrono::Local::now();
