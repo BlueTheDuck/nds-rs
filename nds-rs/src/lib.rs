@@ -3,7 +3,10 @@
 #![feature(adt_const_params)]
 #![allow(unused_parens, dead_code)]
 
+// Reexport internal crates
 pub use nds_sys as sys;
+#[macro_use]
+pub extern crate nds_proc_macros;
 
 #[macro_use]
 pub mod debug;
@@ -20,9 +23,9 @@ mod peripherals;
 pub mod sprite;
 pub mod system;
 pub mod video;
-mod critical_section;
-pub mod header;
 pub use peripherals::Hw;
+pub mod header;
+pub mod runtime;
 
 #[doc(hidden)]
 mod private {

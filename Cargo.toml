@@ -1,9 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["bitfield-tools", "nds-sys", "nds-proc-macros", "nds-rt", "nds-rs"]
+members = ["bitfield-tools", "nds-sys", "nds-proc-macros", "nds-rs"]
 package.edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
 bindgen = "0.71.1"
+libc = { version = "0.2.172", features = ["extra_traits", "const-extern-fn"] }

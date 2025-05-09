@@ -1,4 +1,6 @@
 pub mod registers;
+pub mod affine;
+
 ///  Register overlay for scroll registers
 #[repr(C)]
 pub struct BgScroll {

@@ -7,7 +7,7 @@ build = "build.rs"
 
 [dependencies]
 bitflags = "2.9.0"
-libc = { version = "0.2.172", features = ["extra_traits", "const-extern-fn"] }
+libc = { workspace = true }
 
 [build-dependencies]
 bindgen.workspace = true

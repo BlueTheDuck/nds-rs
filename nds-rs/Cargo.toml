@@ -5,6 +5,7 @@ edition.workspace = true
 
 [dependencies]
 nds-sys = { path = "../nds-sys" }
+nds-proc-macros = { path = "../nds-proc-macros" }
 bitflags = "2.6"
 paste = "1"
 spin = { version = "0.9", default-features = false, features = [
@@ -17,6 +18,7 @@ portable-atomic = { version = "1.7", default-features = false, features = [
 ] }
 embedded-graphics-core = { version = "0.4.0", optional = true }
 critical-section = { version = "1.1.2", features = ["restore-state-bool"] }
+libc = { workspace = true }
 
 [features]
 default = ["embedded-graphics-core"]
