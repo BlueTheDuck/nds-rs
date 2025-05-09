@@ -98,15 +98,22 @@ fn main() {
         .merge_extern_blocks(true)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
 
+    let bindings_folder = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings");
+    std::fs::DirBuilder::new()
+        .recursive(true)
+        .create(&bindings_folder)
+        .unwrap();
+
     configure_console_h(base_builder.clone())
         .generate()
         .expect("Unable to generate bindings")
-        .write_to_file("bindings/console.rs")
+        .write_to_file(bindings_folder.join("console.rs"))
         .expect("Couldn't write bindings!");
 
     configure_background_h(base_builder.clone())
         .generate()
         .expect("Unable to generate bindings")
-        .write_to_file("bindings/background.rs")
+        .write_to_file(bindings_folder.join("backgrounds.rs"))
         .expect("Couldn't write bindings!");
+    println!("cargo:rerun-if-changed=build.rs");
 }
