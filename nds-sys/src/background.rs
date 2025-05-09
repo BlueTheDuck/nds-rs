@@ -1,3 +1,4 @@
+pub mod registers;
 ///  Register overlay for scroll registers
 #[repr(C)]
 pub struct BgScroll {
@@ -179,48 +180,6 @@ pub mod BackgroundControlConstants {
     pub const BG_COLOR_16: BackgroundControl = BackgroundControl::from_bits_retain(0);
 }
 
-pub mod registers {
-    /// Control register for background 0 of Main Engine
-    pub const BG0CNT: *mut u16 = 0x04000008 as _;
-    /// Control register for background 1 of Main Engine
-    pub const BG1CNT: *mut u16 = 0x0400000A as _;
-    /// Control register for background 2 of Main Engine
-    pub const BG2CNT: *mut u16 = 0x0400000C as _;
-    /// Control register for background 3 of Main Engine
-    pub const BG3CNT: *mut u16 = 0x0400000E as _;
-    /// Control register for background 0 of Sub Engine
-    pub const DB_BG0CNT: *mut u16 = 0x04001008 as _;
-    /// Control register for background 1 of Sub Engine
-    pub const DB_BG1CNT: *mut u16 = 0x0400100A as _;
-    /// Control register for background 2 of Sub Engine
-    pub const DB_BG2CNT: *mut u16 = 0x0400100C as _;
-    /// Control register for background 3 of Sub Engine
-    pub const DB_BG3CNT: *mut u16 = 0x0400100E as _;
-
-    /// Affine transformation only. Register for background 2 of Main Engine. Controls x0 (Displacement)
-    pub const BG2X: *mut u32 = 0x04000028 as _;
-    /// Affine transformation only. Register for background 2 of Main Engine. Controls y0 (Displacement)
-    pub const BG2Y: *mut u32 = 0x0400002C as _;
-
-    pub const BG3PA: *mut i16 = 0x04000030 as _;
-    pub const BG3PB: *mut i16 = 0x04000032 as _;
-    pub const BG3PC: *mut i16 = 0x04000034 as _;
-    pub const BG3PD: *mut i16 = 0x04000036 as _;
-    /// Affine transformation only. Register for background 3 of Main Engine. Controls x0 (Displacement)
-    pub const BG3X: *mut u32 = 0x04000038 as _;
-    /// Affine transformation only. Register for background 3 of Main Engine. Controls y0 (Displacement)
-    pub const BG3Y: *mut u32 = 0x0400003C as _;
-
-    /// Affine transformation only. Register for background 2 of Sub Engine. Controls x0 (Displacement)
-    pub const DB_BG2X: *mut u32 = 0x04001028 as _;
-    /// Affine transformation only. Register for background 2 of Sub Engine. Controls y0 (Displacement)
-    pub const DB_BG2Y: *mut u32 = 0x0400102C as _;
-    /// Affine transformation only. Register for background 3 of Sub Engine. Controls x0 (Displacement)
-    pub const DB_BG3X: *mut u32 = 0x04001038 as _;
-    /// Affine transformation only. Register for background 3 of Sub Engine. Controls y0 (Displacement)
-    pub const DB_BG3Y: *mut u32 = 0x0400103C as _;
-}
-
 /// libnds' internal representation of a background.
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -388,6 +347,7 @@ bitflags! {
         const SCREENSIZE_MASK         = 0b11000000_00000000;
         const ALTERNATIVE_EXT_PALETTE = 0b00100000_00000000;
         const MAP_MASK                = 0b00011111_00000000;
+        const BITMAP                  = 0b00000000_10000100;
         /// Set to use 256-color mode, unset for 16-color mode
         const FULLCOLOR               = 0b00000000_10000000;
         /// Set to enable mosaic processing. See [DB_MOSAIC]
@@ -397,37 +357,46 @@ bitflags! {
     }
 }
 impl BackgroundControl {
-    pub fn set_priority(&mut self, priority: u16) {
+    // TODO: Find a better way to generate getters/setters
+
+    pub const fn with_priority(self, priority: u16) -> Self {
         let this = self.bits() & !Self::PRIORITY_MASK.bits();
         let priority = priority & Self::PRIORITY_MASK.bits();
-        *self = Self::from_bits_retain(this | priority);
+        Self::from_bits_retain(this | priority)
     }
-    pub fn priority(&self) -> u16 {
+    pub const fn priority(&self) -> u16 {
         self.bits() & Self::PRIORITY_MASK.bits()
     }
 
-    pub fn set_size(&mut self, size: BgSize) {
-        let this = self.bits() & !Self::SCREENSIZE_MASK.bits();
-        let size = (size as u16) & Self::SCREENSIZE_MASK.bits();
-        *self = Self::from_bits_retain(this | size);
+    pub const fn with_size(self, size: BgSize) -> Self {
+        let size = size as u16 & Self::SCREENSIZE_MASK.bits();
+        self.difference(Self::SCREENSIZE_MASK)
+            .union(Self::from_bits_retain(size))
+    }
+    pub const fn size_value(self) -> u16 {
+        self.intersection(Self::SCREENSIZE_MASK).bits() >> 14
     }
 
-    pub fn set_tile_base(&mut self, tile_base: u16) {
+    pub const fn set_tile_base(&mut self, tile_base: u16) {
         let this = self.bits() & !Self::TILES_MASK.bits();
         let tile_base = (tile_base << 2) & Self::TILES_MASK.bits();
         *self = Self::from_bits_retain(this | tile_base);
     }
-    pub fn tile_base(&self) -> u16 {
+    pub const fn tile_base(self) -> u16 {
         (self.bits() & Self::TILES_MASK.bits()) >> 2
     }
 
-    pub fn set_map_base(&mut self, map_base: u16) {
+    pub const fn set_map_base(&mut self, map_base: u16) {
         let this = self.bits() & !Self::MAP_MASK.bits();
         let map_base = (map_base << 8) & Self::MAP_MASK.bits();
         *self = Self::from_bits_retain(this | map_base);
     }
-    pub fn map_base(&self) -> u16 {
+    pub const fn map_base(&self) -> u16 {
         (self.bits() & Self::MAP_MASK.bits()) >> 8
+    }
+
+    pub const fn with_screen_base_block(self, block: u16) -> Self {
+        todo!()
     }
 }
 
@@ -445,7 +414,7 @@ pub enum Layer {
     Layer3 = 3,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ConstParamTy)]
 #[repr(i32)]
 pub enum BackgroundId {
     MainBg0 = 0,
@@ -458,12 +427,13 @@ pub enum BackgroundId {
     SubBg3 = 7,
 }
 impl BackgroundId {
-    pub const fn is_main(&self) -> bool {
+    pub const fn is_main(self) -> bool {
         matches!(
             self,
             Self::MainBg0 | Self::MainBg1 | Self::MainBg2 | Self::MainBg3
         )
     }
+
     pub const fn get_layer(self) -> Layer {
         match self {
             BackgroundId::MainBg0 | BackgroundId::SubBg0 => Layer::Layer0,
@@ -473,7 +443,6 @@ impl BackgroundId {
         }
     }
 }
-impl core::marker::ConstParamTy for BackgroundId {}
 
 /// Returns the base address of the tile data for the given background.
 /// This value is garbage for bitmap backgrounds.
@@ -491,7 +460,7 @@ pub unsafe fn gfx_ptr(_: BackgroundId) -> *mut u16 {
     todo!()
 }
 
-pub unsafe fn init(
+pub fn init(
     layer: Layer,
     type_: BgType,
     size: BgSize,
@@ -522,7 +491,7 @@ pub unsafe fn init(
         );
     }
 
-    init_call(layer as i32, type_, size, map_base as i32, tile_base as i32)
+    unsafe { init_call(layer as i32, type_, size, map_base as i32, tile_base as i32) }
 }
 
 #[doc(hidden)]
