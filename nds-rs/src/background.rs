@@ -1,67 +1,73 @@
-pub use background::{BgSize, BgType, Layer};
-use nds_sys::{
-    background::{self, bg_get_map_base, bg_get_tile_base, bg_init, bg_init_sub, BackgroundId},
-    bindings::bgState,
-    video::{BG_GFX, BG_GFX_SUB},
-};
+mod graphics_mode;
 
-pub struct Background<const ID: BackgroundId>;
-impl<const ID: BackgroundId> Background<ID> {
-    pub fn graphics_ptr(&self) -> *mut u16 {
-        let bg_type: BgType = unsafe { bgState[ID as usize].type_ as usize }.into();
-        match bg_type {
-            BgType::Text8 | BgType::Text4 | BgType::Rotation | BgType::ExRotation => {
-                if ID.is_main() {
-                    unsafe { BG_GFX.add(0x4000 * bg_get_tile_base(ID as usize)) }
-                } else {
-                    unsafe { BG_GFX_SUB.add(0x4000 * bg_get_tile_base(ID as usize)) }
-                }
-            }
-            BgType::Bmp8 | BgType::Bmp16 => {
-                if ID.is_main() {
-                    unsafe { BG_GFX.add(0x2000 * bg_get_map_base(ID as usize)) }
-                } else {
-                    unsafe { BG_GFX_SUB.add(0x2000 * bg_get_map_base(ID as usize)) }
-                }
-            }
+#[cfg(feature = "embedded-graphics-core")]
+use embedded_graphics_core::prelude::*;
+
+use core::convert::Infallible;
+
+pub use graphics_mode::*;
+
+extern "C" {
+    fn CP15_CleanAndFlushDCacheRange(start: *mut core::ffi::c_void, size: usize);
+}
+
+pub struct RenderTargetBitmap {
+    // TODO: change lifetime?
+    framebuffer: &'static mut [u16],
+    width: u32,
+    height: u32,
+}
+
+impl RenderTargetBitmap {
+    pub(crate) const fn new(framebuffer: &'static mut [u16], width: u32, height: u32) -> Self {
+        Self {
+            framebuffer,
+            width,
+            height,
         }
     }
-    pub fn init(&self, type_: BgType, size: BgSize) -> BackgroundId {
-        // TODO: Check if 3D is being used
 
-        if ID.is_main() {
-            unsafe {
-                bg_init(ID.get_layer(), type_, size, 0, 0)
-                    .try_into()
-                    .unwrap_unchecked()
-            }
-        } else {
-            unsafe {
-                bg_init_sub(ID.get_layer(), type_, size, 0, 0)
-                    .try_into()
-                    .unwrap_unchecked()
-            }
+    #[inline]
+    pub fn put_pixel(&mut self, x: u32, y: u32, color: u16) -> Option<()> {
+        let offset = self.width.checked_mul(y)?.checked_add(x)? as usize;
+        let pixel_mut = self.framebuffer.get_mut(offset)?;
+        *pixel_mut = color;
+
+        Some(())
+    }
+
+    pub fn flush_cache(&mut self) {
+        unsafe {
+            CP15_CleanAndFlushDCacheRange(
+                self.framebuffer.as_mut_ptr() as _,
+                self.framebuffer.len(),
+            );
         }
     }
 }
-
-macro_rules! gen_backgrounds {
-    (
-        $($name:ident => $id:expr;)*
-    ) => {
-        $(
-            pub static $name: Background<{$id}> = Background::<{$id}>;
-        )*
-    };
+#[cfg(feature = "embedded-graphics-core")]
+impl OriginDimensions for RenderTargetBitmap {
+    fn size(&self) -> Size {
+        Size::new(self.width, self.height)
+    }
 }
+#[cfg(feature = "embedded-graphics-core")]
+impl DrawTarget for RenderTargetBitmap {
+    type Color = embedded_graphics_core::pixelcolor::Bgr555;
 
-gen_backgrounds! {
-    MAIN_BG0 => BackgroundId::MainBg0;
-    MAIN_BG1 => BackgroundId::MainBg1;
-    MAIN_BG2 => BackgroundId::MainBg2;
-    MAIN_BG3 => BackgroundId::MainBg3;
-    SUB_BG0 => BackgroundId::SubBg0;
-    SUB_BG1 => BackgroundId::SubBg1;
-    SUB_BG2 => BackgroundId::SubBg2;
-    SUB_BG3 => BackgroundId::SubBg3;
+    type Error = Infallible;
+
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = embedded_graphics_core::Pixel<Self::Color>>,
+    {
+        for Pixel(pos, color) in pixels {
+            if self.bounding_box().contains(pos) {
+                let color = u16::from_le_bytes(color.to_le_bytes());
+                self.put_pixel(pos.x as u32, pos.y as u32, color | 0x8000);
+            }
+        }
+
+        Ok(())
+    }
 }

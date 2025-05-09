@@ -7,6 +7,7 @@ pub use nds_sys as sys;
 
 #[macro_use]
 pub mod debug;
+pub mod background;
 pub mod cache;
 pub mod dma;
 #[cfg(feature = "embedded-graphics-core")]
@@ -30,11 +31,7 @@ mod private {
     /// traits and types.
     pub trait Sealed {}
 
-    impl<'g, L> Sealed for crate::video::backgrounds::DirectBitmapLayer<'g, L> {}
-    impl Sealed for crate::video::Layer0 {}
-    impl Sealed for crate::video::Layer1 {}
-    impl Sealed for crate::video::Layer2 {}
-    impl Sealed for crate::video::Layer3 {}
-    impl Sealed for crate::video::graphics::Mode5 {}
-    impl Sealed for crate::video::graphics::VramA {}
+    impl<L2, L3, R> Sealed for crate::background::GraphicsMode<L2, L3, R> {}
+    impl Sealed for crate::background::MainGraphicsModeSettings {}
+    impl Sealed for crate::background::SubGraphicsModeSettings {}
 }
