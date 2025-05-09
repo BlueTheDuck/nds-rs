@@ -1,10 +1,9 @@
 [workspace]
 resolver = "2"
 members = ["bitfield-tools", "nds-sys", "nds-proc-macros", "nds-rt", "nds-rs", "picolibc"]
-
+package.edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
-bindgen = "0.70.1"
-
+bindgen = "0.71.1"
