@@ -416,7 +416,7 @@ pub enum Layer {
     Layer3 = 3,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, ConstParamTy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, core::marker::ConstParamTy)]
 #[repr(i32)]
 pub enum BackgroundId {
     MainBg0 = 0,
