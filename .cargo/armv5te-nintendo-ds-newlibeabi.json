@@ -1,0 +1,43 @@
+{
+  "abi": "eabi",
+  "arch": "arm",
+  "cpu": "arm946e-s",
+  "asm-args": [
+    "-mthumb-interwork",
+    "-march=armv5te",
+    "-mlittle-endian"
+  ],
+  "exe-suffix": ".elf",
+  "atomic-cas": false,
+  "target-family": [
+    "unix"
+  ],
+  "vendor": "nintendo",
+  "env": "newlib",
+  "c-enum-min-bits": 8,
+  "crt-objects-fallback": "false",
+  "data-layout": "e-m:e-p:32:32-Fi8-i64:64-v128:64:128-a:0:32-n32-S64",
+  "emit-debug-gdb-scripts": false,
+  "features": "+soft-float,+strict-align,+atomics-32",
+  "has-thumb-interworking": true,
+  "linker": "arm-none-eabi-gcc",
+  "linker-flavor": "gnu-cc",
+  "late-link-args": {
+    "gnu-cc": [
+      "-lc", "-lgcc",
+      "-specs=/opt/wonderful/thirdparty/blocksds/core/sys/crts/ds_arm9.specs"
+    ]
+  },
+  "llvm-floatabi": "soft",
+  "llvm-target": "armv5te-none-eabi",
+  "main-needs-argc-argv": false,
+  "metadata": {
+    "description": "Nintendo DS - ARM9 core using WF+BlocksDS toolchain",
+    "host_tools": false,
+    "std": false,
+    "tier": 3
+  },
+  "panic-strategy": "abort",
+  "relocation-model": "static",
+  "target-pointer-width": "32"
+}

@@ -1,0 +1,10 @@
+[build]
+target = ".cargo/armv5te-nintendo-ds-newlibeabi.json"
+
+[unstable]
+build-std = ["core", "compiler_builtins", "alloc"]
+build-std-features = ["compiler-builtins-mem"]
+
+[target.armv5te-nintendo-ds-newlibeabi]
+rustflags = [ "--cfg", "portable_atomic_no_outline_atomics" ]
+linker = "arm-none-eabi-gcc"
