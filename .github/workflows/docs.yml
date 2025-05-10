@@ -9,13 +9,10 @@ env:
   CARGO_NET_RETRY: 10
   RUSTFLAGS: ""
   RUSTUP_MAX_RETRIES: 10
-  DEVKITPRO: "/opt/devkitpro"
-  DEVKITARM: "/opt/devkitpro/devkitARM"
 
 jobs:
   rustdoc:
     runs-on: ubuntu-latest
-    container: devkitpro/devkitarm:latest
 
     steps:
     - name: Checkout repository
@@ -35,22 +32,18 @@ jobs:
         profile: minimal
         override: true
         components: rustfmt, rust-src
-
+      
     - name: Build Documentation
-      run: |
-        pwd
-        export PATH="$PATH:$DEVKITARM/bin"
-        cargo doc --no-deps --open -p nds-sys -p nds
-        
-        
+      run: cargo doc --all-features --no-deps --workspace
+      
+      
     - name: Create an index.html page
-      run: echo "<meta http-equiv="refresh" content="0; URL=nds/index.html" />" >> ./target/nds/doc/index.html
-        
-
+      run: echo "<meta http-equiv="refresh" content="0; URL=armv5te-nintendo-ds-newlibeabi/doc/nds_rs/index.html" />" >> ./target/armv5te-nintendo-ds-newlibeabi/doc/index.html
+      
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v3.8.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
-        publish_dir: ./target/nds/doc
+        publish_dir: ./target/armv5te-nintendo-ds-newlibeabi/doc
         force_orphan: true
