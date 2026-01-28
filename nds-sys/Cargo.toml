@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["BlueTheDuck <hello@perezv.ar>"]
 edition.workspace = true
 build = "build.rs"
+links = "nds"
 
 [dependencies]
 bitflags = "2.9.0"

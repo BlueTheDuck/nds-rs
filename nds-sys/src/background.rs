@@ -212,7 +212,7 @@ impl Default for BgState {
     }
 }
 
-extern "C" {
+unsafe extern "C" {
     pub static mut bgControl: [*mut u16; 8];
     pub static mut bgScrollTable: [*mut BgScroll; 8];
     pub static mut bgTransform: [*mut BgTransform; 8];
@@ -316,13 +316,13 @@ pub enum BgSize {
     FullBitmapBig = ((3 << 14) | bit!(7) | bit!(2) | (4 << 16)),
 }
 
-extern "C" {
+unsafe extern "C" {
     #[link_name = "bgIsText"]
-    fn is_text(id: ::core::ffi::c_int) -> bool;
+    safe fn is_text(id: BackgroundId) -> bool;
 
     #[link_name = "bgInit_call"]
-    fn init_call(
-        layer: ::core::ffi::c_int,
+    unsafe fn init_call(
+        layer: Layer,
         type_: BgType,
         size: BgSize,
         mapBase: ::core::ffi::c_int,
@@ -330,8 +330,8 @@ extern "C" {
     ) -> BackgroundId;
 
     #[link_name = "bgInitSub_call"]
-    fn init_sub_call(
-        layer: ::core::ffi::c_int,
+    unsafe fn init_sub_call(
+        layer: Layer,
         type_: BgType,
         size: BgSize,
         mapBase: ::core::ffi::c_int,
@@ -493,7 +493,7 @@ pub fn init(
         );
     }
 
-    unsafe { init_call(layer as i32, type_, size, map_base as i32, tile_base as i32) }
+    unsafe { init_call(layer, type_, size, map_base as i32, tile_base as i32) }
 }
 
 #[doc(hidden)]
@@ -527,5 +527,5 @@ pub unsafe fn init_sub(
         );
     }
 
-    init_sub_call(layer as i32, type_, size, map_base as i32, tile_base as i32)
+    init_sub_call(layer, type_, size, map_base as i32, tile_base as i32)
 }

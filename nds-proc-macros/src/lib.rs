@@ -129,7 +129,7 @@ pub fn entry(_: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     quote! {
-        #[export_name = "__rust_user_main"]
+        #[unsafe(export_name = "__rust_user_main")]
         #input
     }
     .into()

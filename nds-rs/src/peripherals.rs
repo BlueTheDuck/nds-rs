@@ -2,7 +2,7 @@ use spin::Mutex;
 
 use crate::{system::System, video::Video};
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub static __HW: Mutex<Option<Hw>> = Mutex::new(Some(unsafe { Hw::new() }));
 
 /// Represents the hardware of the console.
@@ -40,7 +40,7 @@ impl Hw {
     pub(crate) const unsafe fn new() -> Self {
         Self {
             video: Video::new(),
-            system: System::new()
+            system: unsafe { System::new() }
         }
     }
 

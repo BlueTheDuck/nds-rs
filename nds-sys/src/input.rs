@@ -1,4 +1,4 @@
-extern "C" {
+unsafe extern "C" {
     pub fn scanKeys();
     pub fn keysDown() -> u32;
     pub fn keysHeld() -> u32;

@@ -213,13 +213,15 @@ pub enum VideoMode {
 
 /// Sets the video mode for the main engine.
 ///
-/// # Safety
+/// NOTE:
 /// While any mode is valid for the main engine,
 /// changing it on the fly can cause graphical glitches
 /// and may crash the system
 #[inline]
-pub unsafe fn set_video_mode(flags: VideoMode) {
-    REG_DISPCNT.write_volatile(flags as u32);
+pub fn set_video_mode(flags: DisplayControl) {
+    unsafe {
+        REG_DISPCNT.write_volatile(flags);
+    }
 }
 
 /// Sets the video mode for the sub engine.

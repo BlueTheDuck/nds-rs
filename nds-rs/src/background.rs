@@ -7,7 +7,7 @@ use core::convert::Infallible;
 
 pub use graphics_mode::*;
 
-extern "C" {
+unsafe extern "C" {
     fn CP15_CleanAndFlushDCacheRange(start: *mut core::ffi::c_void, size: usize);
 }
 

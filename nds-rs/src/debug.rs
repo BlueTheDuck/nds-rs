@@ -76,7 +76,7 @@ pub fn log_to_nocash() -> bool {
 pub fn log_to_tty() -> bool {
     todo!("Write methods are not implemented yet!");
 
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "consoleDemoInit"]
         fn console_demo_init() -> *const core::ffi::c_void;
     }

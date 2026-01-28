@@ -5,14 +5,14 @@ use crate::{header::NdsHeader, Hw};
 /// # Safety
 ///
 /// Must never be called by user code.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn main() {
-    extern "Rust" {
+    unsafe extern "Rust" {
         #[link_name = "__rust_user_main"]
         fn main(hw: Hw) -> ();
     }
 
-    let peripherals = Hw::take().unwrap_unchecked();
+    let peripherals = unsafe { Hw::take().unwrap_unchecked() };
     unsafe {
         main(peripherals);
     }

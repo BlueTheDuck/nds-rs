@@ -1,4 +1,4 @@
-extern "C" {
+unsafe extern "C" {
     pub fn swiWaitForVBlank();
     pub fn swiIntrWait(waitForSet: u32, flags: u32);
     pub fn irqEnable(irq: u32);

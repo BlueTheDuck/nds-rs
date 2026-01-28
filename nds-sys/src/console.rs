@@ -129,7 +129,7 @@ pub enum DebugDevice {
     /// < Directs stderr to the DS console window
     Console = 2,
 }
-extern "C" {
+unsafe extern "C" {
     ///  Loads the font into the console.
     ///
     ///  - `console`: Pointer to the console to update. If NULL, it will update the current console.

@@ -1,6 +1,6 @@
 use super::bitflags::bitflags;
 
-extern "C" {
+unsafe extern "C" {
     pub fn systemShutDown();
     pub fn getBatteryLevel() -> u32;
 }
