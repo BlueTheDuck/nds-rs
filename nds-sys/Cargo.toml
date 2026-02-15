@@ -7,6 +7,7 @@ build = "build.rs"
 links = "nds"
 
 [dependencies]
+bitfield-struct = "0.12.1"
 bitflags = "2.9.0"
 libc = { workspace = true }
 

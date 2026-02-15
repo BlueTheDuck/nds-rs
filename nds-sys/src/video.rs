@@ -3,6 +3,8 @@
 
 use crate::background::Layer;
 
+use bitfield_struct::bitfield;
+
 pub const BG_GFX: *mut u16 = 0x06000000 as _;
 pub const BG_GFX_SUB: *mut u16 = 0x06200000 as _;
 
@@ -65,57 +67,55 @@ pub enum DisplayMode {
     Ram = 0b00_11_0000000000000000,
 }
 
-bitflags! {
-    /// Display control flags
-    #[derive(Copy, Clone)]
-    pub struct DispCntFlags: u32 {
-        /// Use extended palette
-        const EXT_PALETTE = bit!(30);
-        /// MAIN ONLY: 64kB offset for map data.
-        const MAP_BASE_MASK = 0b111 << 27;
-        /// MAIN ONLY: 64kB offset for tile data
-        const TILE_BASE_MASK = 0b111 << 24;
-        const DISPLAY_SRC_MASK = 0b11_11 << 16;
-        /// Set to show objects
-        const OBJECTS = bit!(12);
-        /// Set to show background 3
-        const BG3 = bit!(11);
-        /// Set to show background 2
-        const BG2 = bit!(10);
-        /// Set to show background 1
-        const BG1 = bit!(9);
-        /// Set to show background 0
-        const BG0 = bit!(8);
-        /// Set to use BG0 as the output of the 3D engine
-        const ENABLE_3D = bit!(3);
-        const MODE_MASK = 0b111;
-
-        // all bits have meaning
-        const _ = 0xFFFF_FFFFu32;
-    }
+#[bitfield(u32)]
+pub struct DisplayControl {
+    #[bits(3)]
+    pub bg_mode: u32,
+    pub display_3d: bool,
+    pub tile_obj_mapping: bool,
+    pub bitmap_obj_2d_dimension: bool,
+    pub bitmap_obj_mapping: bool,
+    pub forced_blank: bool,
+    pub display_bg0: bool,
+    pub display_bg1: bool,
+    pub display_bg2: bool,
+    pub display_bg3: bool,
+    pub display_obj: bool,
+    pub window_0_display: bool,
+    pub window_1_display: bool,
+    pub obj_window_display: bool,
+    #[bits(2)]
+    pub display_mode: u32,
+    #[bits(2)]
+    pub display_vram: u32,
+    #[bits(2)]
+    pub tile_obj_1d_boundary: u32,
+    pub bitmap_obj_1d_boundary: bool,
+    pub obj_processing_during_h_blank: bool,
+    #[bits(3)]
+    pub char_base: u32,
+    #[bits(3)]
+    pub screen_base: u32,
+    pub bg_ext_pal: bool,
+    pub obj_ext_pal: bool,
 }
-impl DispCntFlags {
-    pub const fn with_display_mode(self, mode: DisplayMode) -> Self {
-        const MASK: DispCntFlags = DispCntFlags::MODE_MASK.union(DispCntFlags::DISPLAY_SRC_MASK);
-        let mode = mode as u32;
-        self.difference(MASK)
-            .union(DispCntFlags::from_bits_truncate(mode))
+
+impl DisplayControl {
+    pub const fn with_mode(self, mode: DisplayMode) -> Self {
+        let other = Self::from_bits(mode as u32);
+        self.with_display_mode(other.display_mode())
+            .with_display_vram(other.display_vram())
+            .with_bg_mode(other.bg_mode())
     }
-    pub const fn with_map_base(self, base: u32) -> Self {
-        let base = (base & 0b111) << 27;
-        self.difference(DispCntFlags::MAP_BASE_MASK)
-            .union(DispCntFlags::from_bits_truncate(base))
+
+    #[inline]
+    pub const fn with_3d_enabled(self) -> Self {
+        self.with_display_3d(true)
     }
-    pub const fn with_tile_base(self, base: u32) -> Self {
-        let base = (base & 0b111) << 24;
-        self.difference(DispCntFlags::TILE_BASE_MASK)
-            .union(DispCntFlags::from_bits_truncate(base))
-    }
-    pub const fn map_base(self) -> u32 {
-        (self.intersection(DispCntFlags::MAP_BASE_MASK).bits()) >> 27
-    }
-    pub const fn tile_base(self) -> u32 {
-        (self.intersection(DispCntFlags::TILE_BASE_MASK).bits()) >> 24
+
+    #[inline]
+    pub const fn with_display_bg0_enabled(self) -> Self {
+        self.with_display_bg0(true)
     }
 }
 
@@ -129,86 +129,63 @@ pub const TILES_BASE_MASK: u32 = 3 << 24;
 /// `Mode6_2d` and the ones suffixed "3D" are only valid for Main
 /// (The 3D engine renders on Background 0).
 /// Modes FB0-FB3 ("LCD" mode) map the Banks A-D respectively to pixels on screen.
-#[repr(u32)]
-pub enum VideoMode {
-    Mode0_2d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode0)
-        .bits(),
-    Mode1_2d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode1)
-        .bits(),
-    Mode2_2d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode2)
-        .bits(),
-    Mode3_2d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode3)
-        .bits(),
-    Mode4_2d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode4)
-        .bits(),
-    Mode5_2d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode5)
-        .bits(),
-    Mode6_2d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode6)
-        .bits(),
+pub mod modes {
+    use super::*;
 
-    Mode0_3d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode0)
-        .union(DispCntFlags::BG0)
-        .union(DispCntFlags::ENABLE_3D)
-        .bits(),
-    Mode1_3d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode1)
-        .union(DispCntFlags::BG0)
-        .union(DispCntFlags::ENABLE_3D)
-        .bits(),
-    Mode2_3d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode2)
-        .union(DispCntFlags::BG0)
-        .union(DispCntFlags::ENABLE_3D)
-        .bits(),
-    Mode3_3d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode3)
-        .union(DispCntFlags::BG0)
-        .union(DispCntFlags::ENABLE_3D)
-        .bits(),
-    Mode4_3d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode4)
-        .union(DispCntFlags::BG0)
-        .union(DispCntFlags::ENABLE_3D)
-        .bits(),
-    Mode5_3d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode5)
-        .union(DispCntFlags::BG0)
-        .union(DispCntFlags::ENABLE_3D)
-        .bits(),
-    Mode6_3d = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::GraphicsMode6)
-        .union(DispCntFlags::BG0)
-        .union(DispCntFlags::ENABLE_3D)
-        .bits(),
+    pub const MODE0_2D: DisplayControl =
+        DisplayControl::new().with_mode(DisplayMode::GraphicsMode0);
+    pub const MODE1_2D: DisplayControl =
+        DisplayControl::new().with_mode(DisplayMode::GraphicsMode1);
+    pub const MODE2_2D: DisplayControl =
+        DisplayControl::new().with_mode(DisplayMode::GraphicsMode2);
+    pub const MODE3_2D: DisplayControl =
+        DisplayControl::new().with_mode(DisplayMode::GraphicsMode3);
+    pub const MODE4_2D: DisplayControl =
+        DisplayControl::new().with_mode(DisplayMode::GraphicsMode4);
+    pub const MODE5_2D: DisplayControl =
+        DisplayControl::new().with_mode(DisplayMode::GraphicsMode5);
+    pub const MODE6_2D: DisplayControl =
+        DisplayControl::new().with_mode(DisplayMode::GraphicsMode6);
+
+    pub const MODE0_3D: DisplayControl = DisplayControl::new()
+        .with_mode(DisplayMode::GraphicsMode0)
+        .with_3d_enabled()
+        .with_display_bg0_enabled();
+    pub const MODE1_3D: DisplayControl = DisplayControl::new()
+        .with_mode(DisplayMode::GraphicsMode1)
+        .with_3d_enabled()
+        .with_display_bg0_enabled();
+    pub const MODE2_3D: DisplayControl = DisplayControl::new()
+        .with_mode(DisplayMode::GraphicsMode2)
+        .with_3d_enabled()
+        .with_display_bg0_enabled();
+    pub const MODE3_3D: DisplayControl = DisplayControl::new()
+        .with_mode(DisplayMode::GraphicsMode3)
+        .with_3d_enabled()
+        .with_display_bg0_enabled();
+    pub const MODE4_3D: DisplayControl = DisplayControl::new()
+        .with_mode(DisplayMode::GraphicsMode4)
+        .with_3d_enabled()
+        .with_display_bg0_enabled();
+    pub const MODE5_3D: DisplayControl = DisplayControl::new()
+        .with_mode(DisplayMode::GraphicsMode5)
+        .with_3d_enabled()
+        .with_display_bg0_enabled();
+    pub const MODE6_3D: DisplayControl = DisplayControl::new()
+        .with_mode(DisplayMode::GraphicsMode6)
+        .with_3d_enabled()
+        .with_display_bg0_enabled();
 
     /// Display directly from RAM
-    ModeFifo = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::Ram)
-        .bits(),
+    pub const MODE_FIFO: DisplayControl = DisplayControl::new().with_mode(DisplayMode::Ram);
     /// Displays directly from Bank A in LCD mode
-    ModeFb0 = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::VramA)
-        .bits(),
+    pub const MODE_FB0: DisplayControl = DisplayControl::new().with_mode(DisplayMode::VramA);
     /// Displays directly from Bank B in LCD mode
-    ModeFb1 = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::VramB)
-        .bits(),
+    pub const MODE_FB1: DisplayControl = DisplayControl::new().with_mode(DisplayMode::VramB);
     /// Displays directly from Bank C in LCD mode
-    ModeFb2 = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::VramC)
-        .bits(),
+    pub const MODE_FB2: DisplayControl = DisplayControl::new().with_mode(DisplayMode::VramC);
     /// Displays directly from Bank D in LCD mode
-    ModeFb3 = DispCntFlags::empty()
-        .with_display_mode(DisplayMode::VramD)
-        .bits(),
+    pub const MODE_FB3: DisplayControl = DisplayControl::new().with_mode(DisplayMode::VramD);
 }
 
 /// Sets the video mode for the main engine.
@@ -232,12 +209,6 @@ pub fn set_video_mode(flags: DisplayControl) {
 ///  - Only modes 0-5 can be used for the sub engine
 ///  - changing it on the fly can cause graphical glitches and may crash the system
 #[inline]
-pub unsafe fn set_video_mode_sub(flags: VideoMode) {
-    REG_DISPCNT_SUB.write_volatile(flags as u32);
-}
-
-#[inline]
-pub fn video_3d_enabled() -> bool {
-    let control = DispCntFlags::from_bits_retain(unsafe { REG_DISPCNT.read_volatile() });
-    control.contains(DispCntFlags::ENABLE_3D)
+pub unsafe fn set_video_mode_sub(flags: DisplayControl) {
+    unsafe { REG_DISPCNT_SUB.write_volatile(flags) };
 }
