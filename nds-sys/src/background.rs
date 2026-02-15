@@ -67,77 +67,77 @@ pub mod BackgroundControlConstants {
     use super::BackgroundControl;
 
     /// < 32 x 32 tile text background
-    pub const BG_32x32: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_32x32: BackgroundControl = BackgroundControl::from_bits(0);
     /// < 64 x 32 tile text background
-    pub const BG_64x32: BackgroundControl = BackgroundControl::from_bits_retain(16384);
+    pub const BG_64x32: BackgroundControl = BackgroundControl::from_bits(16384);
     /// < 32 x 64 tile text background
-    pub const BG_32x64: BackgroundControl = BackgroundControl::from_bits_retain(32768);
+    pub const BG_32x64: BackgroundControl = BackgroundControl::from_bits(32768);
     /// < 64 x 64 tile text background
-    pub const BG_64x64: BackgroundControl = BackgroundControl::from_bits_retain(49152);
+    pub const BG_64x64: BackgroundControl = BackgroundControl::from_bits(49152);
 
     /// < 16 x 16 tile affine (rotation & scale) background
-    pub const BG_RS_16x16: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_RS_16x16: BackgroundControl = BackgroundControl::from_bits(0);
     /// < 32 x 32 tile affine (rotation & scale) background
-    pub const BG_RS_32x32: BackgroundControl = BackgroundControl::from_bits_retain(16384);
+    pub const BG_RS_32x32: BackgroundControl = BackgroundControl::from_bits(16384);
     /// < 64 x 64 tile affine (rotation & scale) background
-    pub const BG_RS_64x64: BackgroundControl = BackgroundControl::from_bits_retain(32768);
+    pub const BG_RS_64x64: BackgroundControl = BackgroundControl::from_bits(32768);
     /// < 128 x 128 tile affine (rotation & scale) background
-    pub const BG_RS_128x128: BackgroundControl = BackgroundControl::from_bits_retain(49152);
+    pub const BG_RS_128x128: BackgroundControl = BackgroundControl::from_bits(49152);
 
     /// < 128x128 pixel 8-bit bitmap
-    pub const BG_BMP8_128x128: BackgroundControl = BackgroundControl::from_bits_retain(128);
+    pub const BG_BMP8_128x128: BackgroundControl = BackgroundControl::from_bits(128);
     /// < 256x256 pixel 8-bit bitmap
-    pub const BG_BMP8_256x256: BackgroundControl = BackgroundControl::from_bits_retain(16512);
+    pub const BG_BMP8_256x256: BackgroundControl = BackgroundControl::from_bits(16512);
     /// < 512x256 pixel 8-bit bitmap
-    pub const BG_BMP8_512x256: BackgroundControl = BackgroundControl::from_bits_retain(32896);
+    pub const BG_BMP8_512x256: BackgroundControl = BackgroundControl::from_bits(32896);
     /// < 512 pixel 8-bit bitma
-    pub const BG_BMP8_512x512: BackgroundControl = BackgroundControl::from_bits_retain(49280);
+    pub const BG_BMP8_512x512: BackgroundControl = BackgroundControl::from_bits(49280);
     /// < 1024x512 pixel 8-bit Large bitmap (Mode 6, main engine)
-    pub const BG_BMP8_1024x512: BackgroundControl = BackgroundControl::from_bits_retain(16384);
+    pub const BG_BMP8_1024x512: BackgroundControl = BackgroundControl::from_bits(16384);
     /// < 512x1024 pixel 8-bit Large bitmap (Mode 6, main engine)
-    pub const BG_BMP8_512x1024: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_BMP8_512x1024: BackgroundControl = BackgroundControl::from_bits(0);
 
     /// < 128x128 pixel 16-bit bitmap
-    pub const BG_BMP16_128x128: BackgroundControl = BackgroundControl::from_bits_retain(132);
+    pub const BG_BMP16_128x128: BackgroundControl = BackgroundControl::from_bits(132);
     /// < 256x256 pixel 16-bit bitmap
-    pub const BG_BMP16_256x256: BackgroundControl = BackgroundControl::from_bits_retain(16516);
+    pub const BG_BMP16_256x256: BackgroundControl = BackgroundControl::from_bits(16516);
     /// < 512x256 pixel 16-bit bitmap
-    pub const BG_BMP16_512x256: BackgroundControl = BackgroundControl::from_bits_retain(32900);
+    pub const BG_BMP16_512x256: BackgroundControl = BackgroundControl::from_bits(32900);
     /// < 512x512 pixel 16-bit bitmap
-    pub const BG_BMP16_512x512: BackgroundControl = BackgroundControl::from_bits_retain(49284);
+    pub const BG_BMP16_512x512: BackgroundControl = BackgroundControl::from_bits(49284);
 
     /// < Mosaic enable
-    pub const BG_MOSAIC_ON: BackgroundControl = BackgroundControl::from_bits_retain(64);
+    pub const BG_MOSAIC_ON: BackgroundControl = BackgroundControl::from_bits(64);
     /// < Mosaic disable
-    pub const BG_MOSAIC_OFF: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_MOSAIC_OFF: BackgroundControl = BackgroundControl::from_bits(0);
 
     /// < Lower priority will be rendered on top
-    pub const BG_PRIORITY_0: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_PRIORITY_0: BackgroundControl = BackgroundControl::from_bits(0);
     /// < Lower priority will be rendered on top
-    pub const BG_PRIORITY_1: BackgroundControl = BackgroundControl::from_bits_retain(1);
+    pub const BG_PRIORITY_1: BackgroundControl = BackgroundControl::from_bits(1);
     /// < Lower priority will be rendered on top
-    pub const BG_PRIORITY_2: BackgroundControl = BackgroundControl::from_bits_retain(2);
+    pub const BG_PRIORITY_2: BackgroundControl = BackgroundControl::from_bits(2);
     /// < Lower priority will be rendered on top
-    pub const BG_PRIORITY_3: BackgroundControl = BackgroundControl::from_bits_retain(3);
+    pub const BG_PRIORITY_3: BackgroundControl = BackgroundControl::from_bits(3);
 
     /// < Disable wrapping (text backgrounds always wrap)
-    pub const BG_WRAP_OFF: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_WRAP_OFF: BackgroundControl = BackgroundControl::from_bits(0);
     /// < Enable wrapping (text backgrounds always wrap)
-    pub const BG_WRAP_ON: BackgroundControl = BackgroundControl::from_bits_retain(8192);
+    pub const BG_WRAP_ON: BackgroundControl = BackgroundControl::from_bits(8192);
 
     /// < Use slot 0 of extended palettes
-    pub const BG_PALETTE_SLOT0: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_PALETTE_SLOT0: BackgroundControl = BackgroundControl::from_bits(0);
     /// < Use slot 1 of extended palettes
-    pub const BG_PALETTE_SLOT1: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_PALETTE_SLOT1: BackgroundControl = BackgroundControl::from_bits(0);
     /// < Use slot 2 of extended palettes
-    pub const BG_PALETTE_SLOT2: BackgroundControl = BackgroundControl::from_bits_retain(8192);
+    pub const BG_PALETTE_SLOT2: BackgroundControl = BackgroundControl::from_bits(8192);
     /// < Use slot 3 of extended palettes
-    pub const BG_PALETTE_SLOT3: BackgroundControl = BackgroundControl::from_bits_retain(8192);
+    pub const BG_PALETTE_SLOT3: BackgroundControl = BackgroundControl::from_bits(8192);
 
     /// < 256 color text background
-    pub const BG_COLOR_256: BackgroundControl = BackgroundControl::from_bits_retain(128);
+    pub const BG_COLOR_256: BackgroundControl = BackgroundControl::from_bits(128);
     /// < 16x16 color text background
-    pub const BG_COLOR_16: BackgroundControl = BackgroundControl::from_bits_retain(0);
+    pub const BG_COLOR_16: BackgroundControl = BackgroundControl::from_bits(0);
 }
 
 /// libnds' internal representation of a background.
@@ -301,64 +301,21 @@ unsafe extern "C" {
     pub fn update();
 }
 
-bitflags! {
-    #[derive(Clone, Copy)]
-    pub struct BackgroundControl: u16 {
-        const SCREENSIZE_MASK         = 0b11000000_00000000;
-        const ALTERNATIVE_EXT_PALETTE = 0b00100000_00000000;
-        const MAP_MASK                = 0b00011111_00000000;
-        const BITMAP                  = 0b00000000_10000100;
-        /// Set to use 256-color mode, unset for 16-color mode
-        const FULLCOLOR               = 0b00000000_10000000;
-        /// Set to enable mosaic processing. See [DB_MOSAIC]
-        const MOSAIC                  = 0b00000000_01000000;
-        const TILES_MASK              = 0b00000000_00111100;
-        const PRIORITY_MASK           = 0b00000000_00000011;
-    }
+#[bitfield(u16)]
+pub struct BackgroundControl {
+    #[bits(2)]
+    pub priority: u32,
+    #[bits(4)]
+    pub tiles: u32,
+    pub mosaic: bool,
+    pub fullcolor: bool,
+    #[bits(5)]
+    pub map: u32,
+    pub alt_ext_apl: bool,
+    #[bits(2)]
+    pub size: u32,
 }
-impl BackgroundControl {
-    // TODO: Find a better way to generate getters/setters
 
-    pub const fn with_priority(self, priority: u16) -> Self {
-        let this = self.bits() & !Self::PRIORITY_MASK.bits();
-        let priority = priority & Self::PRIORITY_MASK.bits();
-        Self::from_bits_retain(this | priority)
-    }
-    pub const fn priority(&self) -> u16 {
-        self.bits() & Self::PRIORITY_MASK.bits()
-    }
-
-    pub const fn with_size(self, size: BgSize) -> Self {
-        let size = size as u16 & Self::SCREENSIZE_MASK.bits();
-        self.difference(Self::SCREENSIZE_MASK)
-            .union(Self::from_bits_retain(size))
-    }
-    pub const fn size_value(self) -> u16 {
-        self.intersection(Self::SCREENSIZE_MASK).bits() >> 14
-    }
-
-    pub const fn set_tile_base(&mut self, tile_base: u16) {
-        let this = self.bits() & !Self::TILES_MASK.bits();
-        let tile_base = (tile_base << 2) & Self::TILES_MASK.bits();
-        *self = Self::from_bits_retain(this | tile_base);
-    }
-    pub const fn tile_base(self) -> u16 {
-        (self.bits() & Self::TILES_MASK.bits()) >> 2
-    }
-
-    pub const fn set_map_base(&mut self, map_base: u16) {
-        let this = self.bits() & !Self::MAP_MASK.bits();
-        let map_base = (map_base << 8) & Self::MAP_MASK.bits();
-        *self = Self::from_bits_retain(this | map_base);
-    }
-    pub const fn map_base(&self) -> u16 {
-        (self.bits() & Self::MAP_MASK.bits()) >> 8
-    }
-
-    pub const fn with_screen_base_block(self, block: u16) -> Self {
-        todo!()
-    }
-}
 
 /// These bits multiplied by 0x800 and added [BG_SCREEN_BASE_MASK](super::video::Flags::BG_SCREEN_BASE_MASK) give the address where screen info is stored for this layer
 pub const SCREEN_OFFSET_MASK: u16 = 0b11111 << 8;
