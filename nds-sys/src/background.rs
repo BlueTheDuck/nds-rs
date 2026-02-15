@@ -47,58 +47,16 @@ pub struct TileMapEntry8 {
 }
 
 /// Overlay for 16-bit tile map entries
-///
-/// `PPPPVHII_IIIIIIII`
-#[repr(C, packed)]
-#[derive(Default, Clone, Copy)]
+#[bitfield(u16)]
 pub struct TileMapEntry16 {
-    data: u16,
-}
-impl TileMapEntry16 {
-    const INDEX_MASK: u16   = 0b00000011_11111111;
-    const HFLIP: u16        = 0b00000100_00000000;
-    const VFLIP: u16        = 0b00001000_00000000;
-    const PALETTE_MASK: u16 = 0b11110000_00000000;
-
-    pub const fn new() -> Self {
-        Self { data: 0 }
-    }
-
-    pub fn set_index(&mut self, index: u16) {
-        self.data = (self.data & !Self::INDEX_MASK) | (index & Self::INDEX_MASK);
-    }
-    pub fn index(&self) -> u16 {
-        self.data & Self::INDEX_MASK
-    }
-
-    pub fn set_palette(&mut self, palette: u16) {
-        self.data = (self.data & !Self::PALETTE_MASK) | (palette & Self::PALETTE_MASK);
-    }
-    pub fn palette(&self) -> u16 {
-        self.data & Self::PALETTE_MASK
-    }
-
-    pub fn set_hflip(&mut self, hflip: bool) {
-        if hflip {
-            self.data |= Self::HFLIP;
-        } else {
-            self.data &= !Self::HFLIP;
-        }
-    }
-    pub fn hflip(&self) -> bool {
-        self.data & Self::HFLIP != 0
-    }
-    
-    pub fn set_vflip(&mut self, vflip: bool) {
-        if vflip {
-            self.data |= Self::VFLIP;
-        } else {
-            self.data &= !Self::VFLIP;
-        }
-    }
-    pub fn vflip(&self) -> bool {
-        self.data & Self::VFLIP != 0
-    }
+    #[bits(10)]
+    pub index: u16,
+    #[bits(1)]
+    pub hflip: u16,
+    #[bits(1)]
+    pub vflip: u16,
+    #[bits(4)]
+    pub palette: u16,
 }
 
 /// Bit defines for the background control registers
