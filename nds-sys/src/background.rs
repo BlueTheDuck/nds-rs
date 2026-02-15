@@ -430,8 +430,9 @@ pub fn init(
     debug_assert!(tile_base <= 15);
     debug_assert!(map_base <= 31);
     if layer == Layer::Layer0 {
+        let display_control = unsafe { REG_DISPCNT.read_volatile() };
         debug_assert!(
-            !crate::video::video_3d_enabled(),
+            !display_control.display_3d(),
             "Background 0 is currently in use by the 3D engine"
         );
     }
