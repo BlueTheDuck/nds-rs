@@ -1,7 +1,8 @@
 //! Video related functions and constants.
 //! Mostly "borrowed" from libnds's video.h
 
-use crate::background::Layer;
+mod vram_control;
+pub use vram_control::*;
 
 use bitfield_struct::bitfield;
 
@@ -9,9 +10,9 @@ pub const BG_GFX: *mut u16 = 0x06000000 as _;
 pub const BG_GFX_SUB: *mut u16 = 0x06200000 as _;
 
 /// Display control register (main). Used to choose the mode for the Main Engine
-pub const REG_DISPCNT: *mut u32 = 0x04000000 as _;
+pub const REG_DISPCNT: *mut DisplayControl = 0x04000000 as _;
 /// Display control register (sub). Used to choose the mode for the Sub Engine
-pub const REG_DISPCNT_SUB: *mut u32 = 0x04001000 as _;
+pub const REG_DISPCNT_SUB: *mut DisplayControl = 0x04001000 as _;
 
 pub const SCREEN_HEIGHT: u32 = 192;
 pub const SCREEN_WIDTH: u32 = 256;
@@ -19,23 +20,23 @@ pub const SCREEN_WIDTH: u32 = 256;
 pub const VRAM_ENABLE: u8 = 1 << 7;
 
 /// Control register for VRAM A
-pub const VRAM_A_CR: *mut u8 = 0x04000240 as _;
+pub const VRAM_A_CR: *mut VramAType = 0x04000240 as _;
 /// Control register for VRAM B
-pub const VRAM_B_CR: *mut u8 = 0x04000241 as _;
+pub const VRAM_B_CR: *mut VramBType = 0x04000241 as _;
 /// Control register for VRAM C
-pub const VRAM_C_CR: *mut u8 = 0x04000242 as _;
+pub const VRAM_C_CR: *mut VramCType = 0x04000242 as _;
 /// Control register for VRAM D
-pub const VRAM_D_CR: *mut u8 = 0x04000243 as _;
+pub const VRAM_D_CR: *mut VramDType = 0x04000243 as _;
 /// Control register for VRAM E
-pub const VRAM_E_CR: *mut u8 = 0x04000244 as _;
+pub const VRAM_E_CR: *mut VramEType = 0x04000244 as _;
 /// Control register for VRAM F
-pub const VRAM_F_CR: *mut u8 = 0x04000245 as _;
+pub const VRAM_F_CR: *mut VramFType = 0x04000245 as _;
 /// Control register for VRAM G
-pub const VRAM_G_CR: *mut u8 = 0x04000246 as _;
+pub const VRAM_G_CR: *mut VramGType = 0x04000246 as _;
 /// Control register for VRAM H
-pub const VRAM_H_CR: *mut u8 = 0x04000248 as _;
+pub const VRAM_H_CR: *mut VramHType = 0x04000248 as _;
 /// Control register for VRAM I
-pub const VRAM_I_CR: *mut u8 = 0x04000249 as _;
+pub const VRAM_I_CR: *mut VramIType = 0x04000249 as _;
 
 /// When VRAM A is in LCD mode, this points to the first pixel (top left most)
 pub const VRAM_A: *mut u16 = 0x6800000 as _;

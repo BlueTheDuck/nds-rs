@@ -232,7 +232,7 @@ impl Default for BgState {
 }
 
 unsafe extern "C" {
-    pub static mut bgControl: [*mut u16; 8];
+    pub static mut bgControl: [*mut BackgroundControl; 8];
     pub static mut bgScrollTable: [*mut BgScroll; 8];
     pub static mut bgTransform: [*mut BgTransform; 8];
     pub static mut bgState: [BgState; 8];
