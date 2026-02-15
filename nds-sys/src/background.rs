@@ -1,5 +1,52 @@
-pub mod registers;
+use bitfield_struct::bitfield;
+
+use crate::video::{BG_GFX, BG_GFX_SUB, REG_DISPCNT};
+
 pub mod affine;
+
+/// These bits multiplied by 0x800 and added [BG_SCREEN_BASE_MASK](super::video::Flags::BG_SCREEN_BASE_MASK) give the address where screen info is stored for this layer
+pub const SCREEN_OFFSET_MASK: u16 = 0b11111 << 8;
+pub const SCREEN_BASE_OFFSET: u16 = 8;
+pub const CHARACTER_BASE_OFFSET: u16 = 2;
+
+#[derive(PartialEq, Eq, Clone, Copy)]
+#[repr(i32)]
+pub enum Layer {
+    Layer0 = 0,
+    Layer1 = 1,
+    Layer2 = 2,
+    Layer3 = 3,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, core::marker::ConstParamTy)]
+#[repr(i32)]
+pub enum BackgroundId {
+    MainBg0 = 0,
+    MainBg1 = 1,
+    MainBg2 = 2,
+    MainBg3 = 3,
+    SubBg0 = 4,
+    SubBg1 = 5,
+    SubBg2 = 6,
+    SubBg3 = 7,
+}
+impl BackgroundId {
+    pub const fn is_main(self) -> bool {
+        matches!(
+            self,
+            Self::MainBg0 | Self::MainBg1 | Self::MainBg2 | Self::MainBg3
+        )
+    }
+
+    pub const fn get_layer(self) -> Layer {
+        match self {
+            BackgroundId::MainBg0 | BackgroundId::SubBg0 => Layer::Layer0,
+            BackgroundId::MainBg1 | BackgroundId::SubBg1 => Layer::Layer1,
+            BackgroundId::MainBg2 | BackgroundId::SubBg2 => Layer::Layer2,
+            BackgroundId::MainBg3 | BackgroundId::SubBg3 => Layer::Layer3,
+        }
+    }
+}
 
 ///  Register overlay for scroll registers
 #[repr(C)]
@@ -59,6 +106,20 @@ pub struct TileMapEntry16 {
     pub palette: u16,
 }
 
+#[bitfield(u16)]
+pub struct BackgroundControl {
+    #[bits(2)]
+    pub priority: u32,
+    #[bits(4)]
+    pub tiles: u32,
+    pub mosaic: bool,
+    pub fullcolor: bool,
+    #[bits(5)]
+    pub map: u32,
+    pub alt_ext_apl: bool,
+    #[bits(2)]
+    pub size: u32,
+}
 /// Bit defines for the background control registers
 pub mod BackgroundControlConstants {
     #![allow(non_upper_case_globals)]
@@ -301,81 +362,11 @@ unsafe extern "C" {
     pub fn update();
 }
 
-#[bitfield(u16)]
-pub struct BackgroundControl {
-    #[bits(2)]
-    pub priority: u32,
-    #[bits(4)]
-    pub tiles: u32,
-    pub mosaic: bool,
-    pub fullcolor: bool,
-    #[bits(5)]
-    pub map: u32,
-    pub alt_ext_apl: bool,
-    #[bits(2)]
-    pub size: u32,
-}
-
-
-/// These bits multiplied by 0x800 and added [BG_SCREEN_BASE_MASK](super::video::Flags::BG_SCREEN_BASE_MASK) give the address where screen info is stored for this layer
-pub const SCREEN_OFFSET_MASK: u16 = 0b11111 << 8;
-pub const SCREEN_BASE_OFFSET: u16 = 8;
-pub const CHARACTER_BASE_OFFSET: u16 = 2;
-
-#[derive(PartialEq, Eq, Clone, Copy)]
-#[repr(C)]
-pub enum Layer {
-    Layer0 = 0,
-    Layer1 = 1,
-    Layer2 = 2,
-    Layer3 = 3,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, core::marker::ConstParamTy)]
-#[repr(i32)]
-pub enum BackgroundId {
-    MainBg0 = 0,
-    MainBg1 = 1,
-    MainBg2 = 2,
-    MainBg3 = 3,
-    SubBg0 = 4,
-    SubBg1 = 5,
-    SubBg2 = 6,
-    SubBg3 = 7,
-}
-impl BackgroundId {
-    pub const fn is_main(self) -> bool {
-        matches!(
-            self,
-            Self::MainBg0 | Self::MainBg1 | Self::MainBg2 | Self::MainBg3
-        )
-    }
-
-    pub const fn get_layer(self) -> Layer {
-        match self {
-            BackgroundId::MainBg0 | BackgroundId::SubBg0 => Layer::Layer0,
-            BackgroundId::MainBg1 | BackgroundId::SubBg1 => Layer::Layer1,
-            BackgroundId::MainBg2 | BackgroundId::SubBg2 => Layer::Layer2,
-            BackgroundId::MainBg3 | BackgroundId::SubBg3 => Layer::Layer3,
-        }
-    }
-}
-
-/// Returns the base address of the tile data for the given background.
-/// This value is garbage for bitmap backgrounds.
-pub unsafe fn tile_base(_: BackgroundId) -> usize {
-    todo!()
-}
-
-/// Returns the base address of the map data for the given background.
-/// For bitmap backgrounds, this value is the base address of the bitmap data.
-pub unsafe fn map_base(_: BackgroundId) -> usize {
-    todo!()
-}
-
-pub unsafe fn gfx_ptr(_: BackgroundId) -> *mut u16 {
-    todo!()
-}
+// pub fn set_rotate(id: BackgroundId)
+// pub fn rotate(id: BackgroundId)
+// pub fn set(id: BackgroundId)
+// pub fn set_rotate_scale(id: BackgroundId)
+// pub fn set_scale(id: BackgroundId)
 
 pub fn init(
     layer: Layer,
