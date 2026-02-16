@@ -1,6 +1,8 @@
 #![allow(unused_parens)]
 #![allow(clippy::unusual_byte_groupings)]
 
+use bitfield_struct::{bitenum, bitfield};
+
 const CH0_SRC: *mut (*const usize) = 0x040000B0 as *mut (*const usize);
 const CH1_SRC: *mut (*const usize) = 0x040000BC as *mut (*const usize);
 const CH2_SRC: *mut (*const usize) = 0x040000C8 as *mut (*const usize);
@@ -20,55 +22,6 @@ const CH0_FILL: *mut u32 = 0x040000E0 as *mut u32;
 const CH1_FILL: *mut u32 = 0x040000E4 as *mut u32;
 const CH2_FILL: *mut u32 = 0x040000E8 as *mut u32;
 const CH3_FILL: *mut u32 = 0x040000EC as *mut u32;
-
-#[bitenum]
-#[repr(u8)]
-enum DestinationAddressUpdate {
-    #[fallback]
-    Increment = 0,
-    Decrement = 1,
-    Fixed = 2,
-    IncrementReload = 3,
-}
-
-#[bitenum]
-#[repr(u8)]
-enum SourceAddressUpdate {
-    #[fallback]
-    Increment = 0,
-    Decrement = 1,
-    Fixed = 2,
-}
-
-#[bitenum]
-#[repr(u8)]
-enum StartMode {
-    #[fallback]
-    Immediate = 0,
-    Vblank = 1,
-    Hblank = 2,
-    Sync = 3,
-    MainMem = 4,
-    Cart = 5,
-    Accessory = 6,
-    Geometry = 7,
-}
-
-#[bitfield(u32, debug = false)]
-struct DmaControl {
-    #[bits(21)]
-    count: u32,
-    #[bits(2)]
-    dar: DestinationAddressUpdate,
-    #[bits(2)]
-    sar: SourceAddressUpdate,
-    repeat: bool,
-    width: bool,
-    #[bits(3)]
-    mode: StartMode,
-    irq: bool,
-    enable: bool,
-}
 
 /// The DMA has 4 "channels" to operate.
 /// Channels set the priority of operation being processed,
@@ -129,13 +82,168 @@ pub const fn calc_fill(ch: Channel) -> *mut u32 {
     }
 }
 
-/// Returns the addresses for the 4 registers
-pub const fn calc_registers(
-    ch: Channel,
-) -> (*mut (*const usize), *mut (*mut usize), *mut u32, *mut u32) {
-    let src_cr = calc_src(ch);
-    let dst_cr = calc_dst(ch);
-    let cr = calc_cr(ch);
-    let fill_cr = calc_fill(ch);
-    (src_cr, dst_cr, cr, fill_cr)
+#[bitenum]
+#[repr(u8)]
+pub enum DestinationAddressUpdate {
+    #[fallback]
+    Increment = 0,
+    Decrement = 1,
+    Fixed = 2,
+    IncrementReload = 3,
+}
+
+#[bitenum]
+#[repr(u8)]
+pub enum SourceAddressUpdate {
+    #[fallback]
+    Increment = 0,
+    Decrement = 1,
+    Fixed = 2,
+}
+
+#[bitenum]
+#[repr(u8)]
+pub enum StartMode {
+    #[fallback]
+    Immediate = 0,
+    Vblank = 1,
+    Hblank = 2,
+    Sync = 3,
+    MainMem = 4,
+    Cart = 5,
+    Accessory = 6,
+    Geometry = 7,
+}
+
+#[bitfield(u32, debug = false)]
+pub struct DmaControl {
+    #[bits(21)]
+    pub count: usize,
+    #[bits(2)]
+    pub dar: DestinationAddressUpdate,
+    #[bits(2)]
+    pub sar: SourceAddressUpdate,
+    pub repeat: bool,
+    pub width: bool,
+    #[bits(3)]
+    pub mode: StartMode,
+    pub irq: bool,
+    enable: bool,
+}
+impl DmaControl {
+    pub const fn busy(&self) -> bool {
+        self.enable()
+    }
+    pub const fn set_start(&mut self) {
+        self.set_enable(true)
+    }
+    pub const fn with_start(self) -> Self {
+        self.with_enable(true)
+    }
+}
+
+unsafe extern "C" {
+    /// Starts a DMA transfer safely from ITCM.
+    #[link_name = "dmaSetParams"]
+    pub unsafe fn set_params(ch: Channel, src: *const u8, dst: *mut u8, control: DmaControl);
+}
+
+/// Fills `dst` with `len` words of `src`.
+/// This function operates in words (32 bits), so the amount of bytes copied will be `len*4`
+/// # Safety
+/// **It is not recommended to use this function**, it is only provided as a compat with the C version of libnds.
+/// This function works by instructing the DMA to copy `len` words from `src` to `dst`, so the caller must make
+/// sure that:
+///  - only [`Copy`] values are being copied,
+///  - [`dst`, `dst + len`) is valid **and** won't overwrite unrelated data,
+///  - and the channel is free, since [`copy_words`] will overwrite it's settings
+pub unsafe fn copy_words(ch: Channel, src: *const u32, dst: *mut u32, len: usize) {
+    let control = DmaControl::new()
+        .with_count(len)
+        .with_dar(DestinationAddressUpdate::Increment)
+        .with_sar(SourceAddressUpdate::Increment)
+        .with_repeat(false)
+        .with_width(true)
+        .with_mode(StartMode::Immediate)
+        .with_irq(false)
+        .with_start();
+    unsafe {
+        set_params(ch, src as _, dst as _, control);
+    }
+}
+
+/// Fills `dst` with `len` half words of `src`.
+/// This function operates in half words (16 bits), so the amount of bytes copied will be `len*2`
+/// # Safety
+/// **It is not recommended to use this function**, it is only provided as a compat with the C version of libnds.
+/// This function works by instructing the DMA to copy `len` half words from `src` to `dst`, so the caller must make
+/// sure that:
+///  - only [`Copy`] values are being copied,
+///  - [`dst`, `dst + len`) is valid **and** won't overwrite unrelated data,
+///  - and the channel is free, since [`copy_half_words`] will overwrite it's settings
+pub unsafe fn copy_half_words(ch: Channel, src: *const u16, dst: *mut u16, len: usize) {
+    let control = DmaControl::new()
+        .with_count(len)
+        .with_dar(DestinationAddressUpdate::Increment)
+        .with_sar(SourceAddressUpdate::Increment)
+        .with_repeat(false)
+        .with_width(false)
+        .with_mode(StartMode::Immediate)
+        .with_irq(false)
+        .with_start();
+    unsafe {
+        set_params(ch, src as _, dst as _, control);
+    }
+}
+
+
+/// Fills `dst` with `len` copies of `value`.
+/// This function operates in words (32 bits), so the amount of bytes written will be `len*4`
+/// # Safety
+/// **It is not recommended to use this function**, it is only provided as a compat with the C version of libnds.
+/// This function works by instructing the DMA to copy `len` times `value` words over `dst`, so the caller must make
+/// sure that:
+///  - only [`Copy`] values are being copied,
+///  - [`dst`, `dst + len`) is valid **and** won't overwrite unrelated data,
+///  - and the channel is free, since [`fill_words`] will overwrite it's settings
+pub unsafe fn fill_words(ch: Channel, value: u32, dst: *mut u32, len: usize) {
+    let control = DmaControl::new()
+        .with_count(len)
+        .with_dar(DestinationAddressUpdate::Fixed)
+        .with_sar(SourceAddressUpdate::Increment)
+        .with_repeat(false)
+        .with_width(true)
+        .with_mode(StartMode::Immediate)
+        .with_irq(false)
+        .with_start();
+    unsafe {
+        calc_fill(ch).write_unaligned(value);
+        set_params(ch, calc_fill(ch) as _, dst as _, control);
+    }
+}
+
+
+/// Fills `dst` with `len` copies of `value`.
+/// This function operates in half words (16 bits), so the amount of bytes written will be `len*2`
+/// # Safety
+/// **It is not recommended to use this function**, it is only provided as a compat with the C version of libnds.
+/// This function works by instructing the DMA to copy `len` times `value` half words over `dst`, so the caller must make
+/// sure that:
+///  - only [`Copy`] values are being copied,
+///  - [`dst`, `dst + len`) is valid **and** won't overwrite unrelated data,
+///  - and the channel is free, since [`fill_half_words`] will overwrite it's settings
+pub unsafe fn fill_half_words(ch: Channel, value: u16, dst: *mut u16, len: usize) {
+    let control = DmaControl::new()
+        .with_count(len)
+        .with_dar(DestinationAddressUpdate::Fixed)
+        .with_sar(SourceAddressUpdate::Increment)
+        .with_repeat(false)
+        .with_width(false)
+        .with_mode(StartMode::Immediate)
+        .with_irq(false)
+        .with_start();
+    unsafe {
+        calc_fill(ch).write_unaligned(value as _);
+        set_params(ch, calc_fill(ch) as _, dst as _, control);
+    }
 }
