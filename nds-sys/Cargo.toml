@@ -10,6 +10,7 @@ links = "nds"
 bitfield-struct = "0.12.1"
 bitflags = "2.9.0"
 libc = { workspace = true }
+static_assertions = "1.1.0"
 
 [build-dependencies]
 bindgen.workspace = true
