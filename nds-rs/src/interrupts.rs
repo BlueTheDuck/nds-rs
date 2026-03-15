@@ -1,9 +1,5 @@
 pub use interrupts::Flags;
-use nds_sys::interrupts::{self, irqDisable, irqEnable, swiIntrWait, swiWaitForVBlank};
-
-pub mod registers {
-    pub use nds_sys::interrupts::{REG_IE, REG_IME};
-}
+use nds_sys::interrupts::{self, REG_IME, irqDisable, irqEnable, swiIntrWait, swiWaitForVBlank};
 
 /// Waits until the next VBlank.
 /// (Same as [`swi_intr_wait(Flags::VBLANK, true)`](swi_intr_wait).
@@ -39,4 +35,23 @@ pub unsafe fn irq_enable(irq: Flags) {
 /// can (will!) break other code (for example: [`wait_for`](crate::dma::wait_for))
 pub unsafe fn irq_disable(irq: Flags) {
     irqDisable(irq.bits());
+}
+
+#[inline]
+pub fn critical_section<F, R>(f: F) -> R
+where
+    F: FnOnce() -> R,
+{
+    let old_ime = unsafe { REG_IME.read_volatile() };
+    unsafe {
+        REG_IME.write_volatile(0);
+    }
+    
+    let ret = f();
+
+    unsafe {
+        REG_IME.write_volatile(old_ime);
+    }
+
+    ret
 }
